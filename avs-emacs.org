@@ -1,11 +1,11 @@
 #+TITLE: Meine Emacs-Konfiguration
 * Meine Emacs-Konfiguration
-Inspired by (and partially copied from) [[http://dl.dropbox.com/u/3968124/sacha-emacs.html][Sacha Chua's emacs onfiguration]] on [2012-06-09 Sa].
+  Inspired by (and partially copied from) [[http://dl.dropbox.com/u/3968124/sacha-emacs.html][Sacha Chua's emacs onfiguration]] on [2012-06-09 Sa].
 ** Persönliche Informationen
    #+begin_src emacs-lisp
-    (setq user-full-name "Annette von Stockhausen"
-        user-mail-address "annette@vonstockhausen.eu")
-    (setq org-from-is-user-regexp "\\<Annette von Stockhausen\\>")
+     (setq user-full-name "Annette von Stockhausen"
+         user-mail-address "annette@vonstockhausen.eu")
+     (setq org-from-is-user-regexp "\\<Annette von Stockhausen\\>")
    #+end_src
 ** Allgemeine Einstellungen
 *** Zeit-Einstellungen
@@ -15,145 +15,145 @@ Inspired by (and partially copied from) [[http://dl.dropbox.com/u/3968124/sacha-
 *** Kalender
 **** Kalender in Orgmode
      #+begin_src emacs-lisp
-     (require 'calfw)
-     (require 'calfw-org)
-     (require 'calfw-ical)
-     (defun my-open-calendar ()
-      (interactive)
-      (cfw:open-calendar-buffer
-       :view 'month
-       :contents-sources
-      (list 
-      (cfw:org-create-source "Seagreen4") ; color
-      (cfw:ical-create-source "ical" "https://www.google.com/.../basic.ics" "#2952a3"))))
+       (require 'calfw)
+       (require 'calfw-org)
+       (require 'calfw-ical)
+       (defun my-open-calendar ()
+         (interactive)
+         (cfw:open-calendar-buffer
+          :view 'month
+          :contents-sources
+          (list 
+           (cfw:org-create-source "Seagreen4") ; color
+           (cfw:ical-create-source "ical" "https://www.google.com/calendar/ical/.../basic.ics" "#2952a3"))))
      #+end_src
 **** Kalender mit deutschen Feiertagen, kopiert von http://thenybble.de/projects/german-emacs-calendar.html
     #+begin_src emacs-lisp
-(setq calendar-week-start-day 1)
-(setq european-calendar-style t)
-(setq calendar-time-display-form
-      '(24-hours ":" minutes (and time-zone (concat " (" time-zone ")"))))
-
-(setq calendar-abbrev-length 2)
-
-(setq calendar-day-name-array
-      ["Sonntag" "Montag" "Dienstag" "Mittwoch"
-       "Donnerstag" "Freitag" "Samstag"])
-
-
-(setq calendar-month-name-array
-      ["Januar" "Februar" "März" "April" "Mai" "Juni"
-       "Juli" "August" "September" "Oktober" "November" "Dezember"])
-
-(setq solar-n-hemi-seasons
-      '("Frühlingsanfang" "Sommeranfang" "Herbstanfang" "Winteranfang"))
-
-(setq general-holidays
-      '((holiday-fixed 1 1 "Neujahr")
-        (holiday-fixed 5 1 "1. Mai")
-        (holiday-fixed 10 3 "Tag der Deutschen Einheit")))
-
-(setq christian-holidays
-      '(
-        (holiday-float 12 0 -4 "1. Advent" 24)
-        (holiday-float 12 0 -3 "2. Advent" 24)
-        (holiday-float 12 0 -2 "3. Advent" 24)
-        (holiday-float 12 0 -1 "4. Advent" 24)
-        (holiday-fixed 12 25 "1. Weihnachtstag")
-        (holiday-fixed 12 26 "2. Weihnachtstag")
-        (holiday-fixed 1 6 "Heilige Drei Könige")
-        ;; Date of Easter calculation taken from holidays.el.
-        (let* ((century (1+ (/ displayed-year 100)))
-               (shifted-epact (% (+ 14 (* 11 (% displayed-year 19))
-                                    (- (/ (* 3 century) 4))
-                                    (/ (+ 5 (* 8 century)) 25)
-                                    (* 30 century))
-                                 30))
-               (adjusted-epact (if (or (= shifted-epact 0)
-                                       (and (= shifted-epact 1)
-                                            (< 10 (% displayed-year 19))))
-                                   (1+ shifted-epact)
-                                 shifted-epact))
-               (paschal-moon (- (calendar-absolute-from-gregorian
-                                 (list 4 19 displayed-year))
-                                adjusted-epact))
-               (easter (calendar-dayname-on-or-before 0 (+ paschal-moon 7))))
-          (filter-visible-calendar-holidays
-           (mapcar
-            (lambda (l)
-              (list (calendar-gregorian-from-absolute (+ easter (car l)))
-                    (nth 1 l)))
+      (setq calendar-week-start-day 1)
+      (setq european-calendar-style t)
+      (setq calendar-time-display-form
+            '(24-hours ":" minutes (and time-zone (concat " (" time-zone ")"))))
+      
+      (setq calendar-abbrev-length 2)
+      
+      (setq calendar-day-name-array
+            ["Sonntag" "Montag" "Dienstag" "Mittwoch"
+             "Donnerstag" "Freitag" "Samstag"])
+      
+      
+      (setq calendar-month-name-array
+            ["Januar" "Februar" "März" "April" "Mai" "Juni"
+             "Juli" "August" "September" "Oktober" "November" "Dezember"])
+      
+      (setq solar-n-hemi-seasons
+            '("Frühlingsanfang" "Sommeranfang" "Herbstanfang" "Winteranfang"))
+      
+      (setq general-holidays
+            '((holiday-fixed 1 1 "Neujahr")
+              (holiday-fixed 5 1 "1. Mai")
+              (holiday-fixed 10 3 "Tag der Deutschen Einheit")))
+      
+      (setq christian-holidays
             '(
-              (-48 "Rosenmontag")
-              ( -2 "Karfreitag")
-              (  0 "Ostersonntag")
-              ( +1 "Ostermontag")
-              (+39 "Christi Himmelfahrt")
-              (+49 "Pfingstsonntag")
-              (+50 "Pfingstmontag")
-              (+60 "Fronleichnam")
-              ))))
-        (holiday-fixed 8 15 "Mariä Himmelfahrt")
-        (holiday-fixed 11 1 "Allerheiligen")
-        (holiday-float 11 3 1 "Buß- und Bettag" 16)
-        (holiday-float 11 0 1 "Totensonntag" 20)))
-
-(setq calendar-holidays
-      (append general-holidays local-holidays other-holidays
-              hebrew-holidays christian-holidays solar-holidays))
+              (holiday-float 12 0 -4 "1. Advent" 24)
+              (holiday-float 12 0 -3 "2. Advent" 24)
+              (holiday-float 12 0 -2 "3. Advent" 24)
+              (holiday-float 12 0 -1 "4. Advent" 24)
+              (holiday-fixed 12 25 "1. Weihnachtstag")
+              (holiday-fixed 12 26 "2. Weihnachtstag")
+              (holiday-fixed 1 6 "Heilige Drei Könige")
+              ;; Date of Easter calculation taken from holidays.el.
+              (let* ((century (1+ (/ displayed-year 100)))
+                     (shifted-epact (% (+ 14 (* 11 (% displayed-year 19))
+                                          (- (/ (* 3 century) 4))
+                                          (/ (+ 5 (* 8 century)) 25)
+                                          (* 30 century))
+                                       30))
+                     (adjusted-epact (if (or (= shifted-epact 0)
+                                             (and (= shifted-epact 1)
+                                                  (< 10 (% displayed-year 19))))
+                                         (1+ shifted-epact)
+                                       shifted-epact))
+                     (paschal-moon (- (calendar-absolute-from-gregorian
+                                       (list 4 19 displayed-year))
+                                      adjusted-epact))
+                     (easter (calendar-dayname-on-or-before 0 (+ paschal-moon 7))))
+                (filter-visible-calendar-holidays
+                 (mapcar
+                  (lambda (l)
+                    (list (calendar-gregorian-from-absolute (+ easter (car l)))
+                          (nth 1 l)))
+                  '(
+                    (-48 "Rosenmontag")
+                    ( -2 "Karfreitag")
+                    (  0 "Ostersonntag")
+                    ( +1 "Ostermontag")
+                    (+39 "Christi Himmelfahrt")
+                    (+49 "Pfingstsonntag")
+                    (+50 "Pfingstmontag")
+                    (+60 "Fronleichnam")
+                    ))))
+              (holiday-fixed 8 15 "Mariä Himmelfahrt")
+              (holiday-fixed 11 1 "Allerheiligen")
+              (holiday-float 11 3 1 "Buß- und Bettag" 16)
+              (holiday-float 11 0 1 "Totensonntag" 20)))
+      
+      (setq calendar-holidays
+            (append general-holidays local-holidays other-holidays
+                    hebrew-holidays christian-holidays solar-holidays))
     #+end_src
 *** Suchen und Finden in OS X
     #+begin_src emacs-lisp
-    (setq locate-command "mdfind")
+      (setq locate-command "mdfind")
     #+end_src
 *** Zotero-Anbindung
     #+begin_src emacs-lisp
-    (require 'zotexo)
-    (add-hook 'LaTeX-mode-hook 'zotexo-minor-mode)
+      (require 'zotexo)
+      (add-hook 'LaTeX-mode-hook 'zotexo-minor-mode)
     #+end_src
 *** Little editing shortcuts
 
 **** Navigation
      Sätze enden mit einfachem Leerzeichen
-#+begin_src emacs-lisp
-(setq sentence-end-double-space nil)
-#+end_src
+     #+begin_src emacs-lisp
+       (setq sentence-end-double-space nil) 
+     #+end_src
 
 **** Enter führt zu neuer Zeile und Einrückung
-#+begin_src emacs-lisp
-(global-set-key (kbd "RET") 'newline-and-indent)
-#+end_src
+     #+begin_src emacs-lisp
+       (global-set-key (kbd "RET") 'newline-and-indent)
+     #+end_src
 
 **** Searching based on the current word
-This lets me search up and down.
-
-#+begin_src emacs-lisp
-(defun sacha/search-word-backward ()
-  "Find the previous occurrence of the current word."
-  (interactive)
-  (let ((cur (point)))
-    (skip-syntax-backward "w_")
-    (goto-char
-     (if (re-search-backward (concat "\\_<" (current-word) "\\_>") nil t)
-	 (match-beginning 0)
-       cur))))
-
-(defun sacha/search-word-forward ()
-  "Find the next occurrence of the current word."
-  (interactive)
-  (let ((cur (point)))
-    (skip-syntax-forward "w_")
-    (goto-char
-     (if (re-search-forward (concat "\\_<" (current-word) "\\_>") nil t)
-	 (match-beginning 0)
-       cur))))
-(global-set-key '[M-up] 'sacha/search-word-backward)
-(global-set-key '[M-down] 'sacha/search-word-forward)
-(defadvice search-for-keyword (around sacha activate)
-  "Match in a case-insensitive way."
-  (let ((case-fold-search t))
-    ad-do-it))
-#+end_src
+     This lets me search up and down.
+     
+     #+begin_src emacs-lisp
+       (defun sacha/search-word-backward ()
+         "Find the previous occurrence of the current word."
+         (interactive)
+         (let ((cur (point)))
+           (skip-syntax-backward "w_")
+           (goto-char
+            (if (re-search-backward (concat "\\_<" (current-word) "\\_>") nil t)
+                (match-beginning 0)
+              cur))))
+       
+       (defun sacha/search-word-forward ()
+         "Find the next occurrence of the current word."
+         (interactive)
+         (let ((cur (point)))
+           (skip-syntax-forward "w_")
+           (goto-char
+            (if (re-search-forward (concat "\\_<" (current-word) "\\_>") nil t)
+                (match-beginning 0)
+              cur))))
+       (global-set-key '[M-up] 'sacha/search-word-backward)
+       (global-set-key '[M-down] 'sacha/search-word-forward)
+       (defadvice search-for-keyword (around sacha activate)
+         "Match in a case-insensitive way."
+         (let ((case-fold-search t))
+           ad-do-it))
+     #+end_src
 
 **** Tramp and editing files over SSH
 Emacs lets you edit files on remote servers, which is pretty darn
@@ -164,122 +164,206 @@ cool.
 #+end_src
 
 **** Ido-mode: Show recent files
-Ido-mode is awesome. Let's make it awesomer. I usually want to go to
-recently-opened files first.
+     Ido-mode is awesome. Let's make it awesomer. I usually want to go to
+     recently-opened files first.
 
-#+begin_src emacs-lisp
-(require 'ido)
-  (ido-mode 1)
-  (setq ido-default-buffer-method 'selected-window)
-  (add-hook 'ido-make-file-list-hook 'ido-sort-mtime)
-  (add-hook 'ido-make-dir-list-hook 'ido-sort-mtime)
-  (defun ido-sort-mtime ()
-    (setq ido-temp-list
-          (sort ido-temp-list 
-                (lambda (a b)
-                  (let ((ta (nth 5 (file-attributes (concat ido-current-directory a))))
-                        (tb (nth 5 (file-attributes (concat ido-current-directory b)))))
-                    (if (= (nth 0 ta) (nth 0 tb))
-                        (> (nth 1 ta) (nth 1 tb))
-                      (> (nth 0 ta) (nth 0 tb)))))))
-    (ido-to-end  ;; move . files to end (again)
-     (delq nil (mapcar
-                (lambda (x) (if (string-equal (substring x 0 1) ".") x))
-                ido-temp-list))))
-;; Zusätzlich
-(setq ido-enable-flex-matching t) ;; enable fuzzy matching
-
-#+end_src
+     #+begin_src emacs-lisp
+       (require 'ido)
+       (ido-mode 1)
+       (setq ido-default-buffer-method 'selected-window)
+       (add-hook 'ido-make-file-list-hook 'ido-sort-mtime)
+       (add-hook 'ido-make-dir-list-hook 'ido-sort-mtime)
+       (defun ido-sort-mtime ()
+         (setq ido-temp-list
+               (sort ido-temp-list 
+                     (lambda (a b)
+                       (let ((ta (nth 5 (file-attributes (concat ido-current-directory a))))
+                             (tb (nth 5 (file-attributes (concat ido-current-directory b)))))
+                         (if (= (nth 0 ta) (nth 0 tb))
+                             (> (nth 1 ta) (nth 1 tb))
+                           (> (nth 0 ta) (nth 0 tb)))))))
+         (ido-to-end  ;; move . files to end (again)
+          (delq nil (mapcar
+                     (lambda (x) (if (string-equal (substring x 0 1) ".") x))
+                     ido-temp-list))))
+       ;; Zusätzlich
+       (setq ido-enable-flex-matching t) ;; enable fuzzy matching
+       
+     #+end_src
 *** Change "yes or no" to "y or n"
 
-#+begin_src emacs-lisp
-(fset 'yes-or-no-p 'y-or-n-p)   
-#+end_src
+    #+begin_src emacs-lisp
+      (fset 'yes-or-no-p 'y-or-n-p)   
+    #+end_src
 
 *** Mail aus Emacs heraus senden
     #+begin_src emacs-lisp
-    (defun mail-current-buffer ()
-    "Send the current buffer to email (for Mac)"
-    (interactive)
-    (shell-command (format "open -a Mail %s" (buffer-file-name))))
-    (define-key global-map "\C-cs" 'mail-current-buffer)
+      (defun mail-current-buffer ()
+        "Send the current buffer to email (for Mac)"
+        (interactive)
+        (shell-command (format "open -a Mail %s" (buffer-file-name))))
+      (define-key global-map "\C-cs" 'mail-current-buffer)
     #+end_src
 ** Orgmode
    #+begin_src emacs-lisp
-   (require 'org)
-   (require 'org-install)
-(require 'org-inlinetask)
-(require 'org-protocol)
+     (require 'org)
+     (require 'org-install)
+     (require 'org-inlinetask)
+     (require 'org-protocol)
    #+end_src
+*** Agenda
+    #+begin_src emacs-lisp
+      (setq org-agenda-add-entry-text-maxlines 20)
+      (setq org-agenda-files (quote ("~/Private/ORG/ws2011.org" "~/Documents/projekte/aw_III_4/todo.org" "~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org")))
+      (setq org-agenda-include-diary nil)
+      (setq org-agenda-skip-deadline-if-done t)
+      (setq org-agenda-skip-scheduled-if-deadline-is-shown (quote not-today))
+      (setq org-agenda-skip-scheduled-if-done t)
+      (setq org-agenda-skip-timestamp-if-done t)
+      (setq org-agenda-todo-ignore-deadlines (quote near))
+      (setq org-agenda-todo-ignore-scheduled (quote future))
+      ;; Agenda soll in ganzem Frame starten
+      (setq org-agenda-window-frame-fractions '(1.0 . 1.0))
+      (setq org-agenda-custom-commands
+            '(("d" "Deadlines" agenda ""
+               ((org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
+                (org-agenda-ndays 1)
+                (org-deadline-warning-days 60)
+                (org-agenda-time-grid nil)))
+              ("t" "Todos"
+               ((todo "TODO")
+                (todo "DELEGIERT") 
+                (todo "WARTEN")))
+              ("k" "Kontexte"
+               ((tags-todo "ZUHAUSE")
+                (tags-todo "INSTITUT")
+                (tags-todo "UB")
+                (tags-todo "STADT")
+                (tags-todo "COMPUTER")
+                (tags-todo "EMAIL")
+                (tags-todo "TELEPHON")
+                (tags-todo "ONLINE")
+                (tags-todo "HIWI")
+                (tags-todo "HCB")))
+              ("n" "Notizen"
+               ((tags-todo "NOTIZ")))
+              ("I" "Import diary from iCal" agenda ""
+               ((org-agenda-mode-hook
+                 (lambda ()
+                   (org-mac-iCal)))))
+              ))
+      (setq org-agenda-text-search-extra-files '(agenda-archives))
+      (setq org-icalendar-include-todo t)
+      (setq org-icalendar-use-deadline (quote (event-if-todo event-if-not-todo)))
+      (setq org-icalendar-use-scheduled (quote (event-if-todo event-if-not-todo)))
+      (setq org-icalendar-categories (quote (all-tags)))
+      (setq org-icalendar-include-body 2000)
+      (setq org-agenda-add-entry-text-maxlines 20)
+      (setq org-agenda-include-diary t)
+      ;; Aktuelle Zeile in der Agenda hervorheben
+      (add-hook 'org-agenda-mode-hook '(lambda () (hl-line-mode 1 )))
+      
+      ;; (setq org-agenda-format-date 
+      ;;  "%d.%m.%Y ---------------------------------------------------------------------")
+      (setq org-agenda-date-weekend (quote (:foreground "Yellow" :weight bold)))
+    #+end_src
 *** Allgemeine Einstellungen
     #+begin_src emacs-lisp
-    (global-font-lock-mode 1)                     ; for all buffers
-(setq org-hide-leading-stars t)
-(setq org-id-method (quote uuidgen))
-(setq org-startup-align-all-tables "align")
-(setq org-return-follows-link t)
- (setq org-startup-with-beamer-mode t)
- (setq org-startup-with-inline-images nil)
- (setq org-support-shift-select t)
- (setq org-tab-follows-link t)
- (setq org-time-stamp-custom-formats (quote ("<%a., %d.%m.%Y>" . "<%a., %d.%m.%Y %H:%M>")))
- (setq org-after-todo-state-change-hook nil)
- (setq org-babel-load-languages (quote ((emacs-lisp) (R . t) (ditaa . t) (latex . t))))
- (setq org-confirm-babel-evaluate nil)
- (setq org-crypt-key "C62E93D8")
-    #+end_src
-*** Orgmode für .org-Dateien
-    #+begin_src emacs-lisp
-    (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
-    #+end_src
-*** GTD mit Orgmode
-    #+begin_src emacs-lisp
-    ;; I keep almost everything in one big org file.
-(defvar org-gtd-file "~/Private/ORG/gtd.org")
-;; I open my gtd file when I hit C-c g
-(defun gtd ()
-  "Open the GTD file."
-  (interactive)
-  (find-file org-gtd-file))
+      (global-font-lock-mode 1)                     ; for all buffers
+      (setq org-hide-leading-stars t)
+      (setq org-id-method (quote uuidgen))
+      (setq org-startup-align-all-tables "align")
+      (setq org-return-follows-link t)
+      (setq org-startup-with-beamer-mode t)
+      (setq org-startup-with-inline-images nil)
+      (setq org-support-shift-select t)
+      (setq org-tab-follows-link t)
+      (setq org-time-stamp-custom-formats (quote ("<%a., %d.%m.%Y>" . "<%a., %d.%m.%Y %H:%M>")))
+      (setq org-after-todo-state-change-hook nil)
+      (setq org-babel-load-languages (quote ((emacs-lisp) (ditaa . t) (latex . t))))
+      (setq org-confirm-babel-evaluate nil)
+      (setq org-crypt-key "C62E93D8")
     #+end_src
 *** Anbindung von Orgmode an Mac-Programme
     #+begin_src emacs-lisp
-    (require 'org-mac-iCal)
-    (require 'org-mac-link-grabber)
-    (global-set-key "\C-cm" 'org-mac-message-insert-selected)
-    (global-set-key "\C-xm" 'omgl-grab-link)
-    (setq org-mac-mail-account "Privat")
-    (setq org-mac-grab-Firefox-app-p nil)
-    (setq org-mac-grab-Safari-app-p nil)
-    (setq org-mac-grab-Together-app-p nil)
+      (require 'org-mac-iCal)
+      (require 'org-mac-link-grabber)
+      (global-set-key "\C-cm" 'org-mac-message-insert-selected)
+      (global-set-key "\C-xm" 'omgl-grab-link)
+      (setq org-mac-mail-account "Privat")
+      (setq org-mac-grab-Firefox-app-p nil)
+      (setq org-mac-grab-Safari-app-p nil)
+      (setq org-mac-grab-Together-app-p nil)
     #+end_src
-*** Modules
-Org has a whole bunch of optional modules. These are the ones I'm
-currently experimenting with.
-#+begin_src emacs-lisp
-  (setq org-modules '(org-info
-                      org-jsinfo
-                      org-habit
-                      org-mouse
-                      org-annotate-file
-                      org-eval
-                      org-expiry
-                      org-interactive-query
-                      org-mac-message
-                      org-man
-                      org-bibtex
-                      org-panel
-                      org-screen
-                      org-toc))
-#+end_src
-*** Weitere Orgmode-Einstellungen
-**** Ido-style Completion
-I also like using =ido=-style completion.
-
-#+begin_src emacs-lisp
-(setq org-completion-use-ido t)
-#+end_src
-
+*** Ditaa
+    #+begin_src emacs-lisp
+      (setq org-ditaa-jar-path "~/.emacs.d/contrib/scripts/ditaa.jar")
+      (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+    #+end_src
+*** Drawers und Logging
+    #+begin_src emacs-lisp
+      (setq org-drawers (quote ("PROPERTIES" "CLOCKTABLE" "LOGBOOK" "CLOCK")))
+      (setq org-clock-into-drawer "CLOCK")
+    #+end_src
+*** Export
+**** Allgemeine Einstellungen
+     #+begin_src emacs-lisp
+     (setq org-export-with-drawers nil)
+     #+end_src
+**** LaTeX-Beamer
+     #+begin_src emacs-lisp
+     (setq org-beamer-outline-frame-title "Themen")
+     #+end_src
+**** LaTeX allgemein
+     #+begin_src emacs-lisp
+       (setq org-export-latex-classes (quote (("article" "\\documentclass[11pt,a4paper]{article}\\usepackage[margin=2cm]{geometry}\\usepackage{fontspec,xkeyval}\\usepackage[babelshorthands]{polyglossia}\\setdefaultlanguage{german}\\setotherlanguage[variant=poly]{greek}\\setotherlanguages{french,english,latin}\\setromanfont[Mapping=tex-text,Numbers=Lowercase,Ligatures=Common]{Arno Pro}" ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) ("report" "\\documentclass[11pt,a4paper]{report}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")) ("book" "\\documentclass[11pt,a4paper,openany]{memoir}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
+                                              ("org-article" "\\documentclass{org-article}[NO-DEFAULT-PACKAGES]
+                      [PACKAGES]
+                      [EXTRA]" ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
+                                              ("koma-article" "\\documentclass{scrartcl}" ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
+                                              ("koma-report" "\\documentclass{scrreprt}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
+                                              ("beamer" "\\documentclass{beamer}\\usepackage{fontspec,xkeyval}\\usepackage[babelshorthands]{polyglossia}\\setdefaultlanguage{german}\\setotherlanguage[variant=poly]{greek}\\setotherlanguages{french,english}\\setromanfont[Mapping=tex-text,Numbers=Lowercase,Ligatures=Common]{Adobe
+       Garamond Pro}\\setsansfont[Mapping=tex-text,Numbers=Lowercase,Scale=MatchUppercase]{Iwona}\\newfontfamily\\greekfont[Mapping=tex-text,Script=Greek,Ligatures=Common,Scale=MatchLowercase]{GFS
+       Neohellenic}" org-beamer-sectioning))))
+       (setq org-export-latex-date-format "%d. %B %Y")
+       (setq org-export-latex-default-packages-alist (quote (("" "graphicx" t) ("" "longtable" t) ("" "hyperref" t) "\\tolerance=1000")))
+       (setq org-export-latex-emphasis-alist (quote (("*" "\\textbf{%s}" nil) ("/" "\\emph{%s}" nil) ("_" "\\underline{%s}" nil) ("+" "\\st{%s}" nil) ("=" "\\verb" t) ("~" "\\verb" t) ("@" "\\alert{%s}" nil))))
+       (setq org-export-latex-hyperref-format "\\ref{%s}")
+       (setq org-export-latex-listings t)
+       (setq org-export-latex-todo-keyword-markup (quote (("TODO" . "{\\color{red}{\\sffamily\\textbf{%s}}}"))))
+     #+end_src
+**** HTML
+     #+begin_src emacs-lisp
+       (require 'htmlize)
+       (setq org-emphasis-alist (quote (("*" bold "<b>" "</b>") ("/" italic "<i>" "</i>") ("_" underline "<span style=\"text-decoration:underline;\">" "</span>") ("=" org-code "<code>" "</code>" verbatim) ("~" org-verbatim "<code>" "</code>" verbatim) ("+" (:strike-through t) "<del>" "</del>") ("@" org-warning "<b>" "</b>"))))
+       (setq org-export-html-home/up-format "<div id=\"org-div-home-and-up\" style=\"text-align:right;font-size:70%%;white-space:nowrap;\">
+        <a accesskey=\"h\" href=\"%s\"> UP </a>
+        |
+        <a accesskey=\"H\" href=\"%s\"> HOME </a>
+       </div>")
+       (setq org-export-html-postamble t)
+       (setq org-export-html-postamble-format (quote (("de" "<p class=\"author\">Autor: %e</p>
+       <p class=\"date\">Datum: %d</p>
+       <p class=\"creator\">Generated by %c</p>"))))
+     #+end_src
+**** HTML5-Präsentation
+     #+begin_src emacs-lisp
+     (require 'org-html5presentation)
+     #+end_src
+*** Footnotes
+    #+begin_src emacs-lisp
+    (setq org-footnote-auto-adjust t)
+    #+end_src
+*** GTD mit Orgmode
+    #+begin_src emacs-lisp
+      ;; I keep almost everything in one big org file.
+      (defvar org-gtd-file "~/Private/ORG/gtd.org")
+      ;; I open my gtd file when I hit C-c g
+      (defun gtd ()
+        "Open the GTD file."
+        (interactive)
+        (find-file org-gtd-file))
+    #+end_src
 *** Keyboard shortcuts
 
     #+begin_src emacs-lisp
@@ -295,143 +379,32 @@ I also like using =ido=-style completion.
      (global-set-key (kbd "C-c h") 'omlg-grab-link) ;; grab-link from mac apps
     #+end_src
 
-=append-next-kill= is more useful to me than =org-table-copy-region=.
+    =append-next-kill= is more useful to me than =org-table-copy-region=.
 
-#+begin_src emacs-lisp
-(define-key org-mode-map (kbd "C-M-w") 'append-next-kill)
-#+end_src
-
-I don't use the diary, but I do use the clock a lot.
-
-#+begin_src emacs-lisp
-  (define-key org-agenda-mode-map "i" 'org-agenda-clock-in)
-#+end_src
-    
-*** Agenda
     #+begin_src emacs-lisp
-    (setq org-agenda-add-entry-text-maxlines 20)
-    (setq org-agenda-files (quote ("~/Private/ORG/ws2011.org" "~/Documents/projekte/aw_III_4/todo.org" "~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org")))
-    (setq org-agenda-include-diary nil)
-    (setq org-agenda-skip-deadline-if-done t)
-    (setq org-agenda-skip-scheduled-if-deadline-is-shown (quote not-today))
-    (setq org-agenda-skip-scheduled-if-done t)
-    (setq org-agenda-skip-timestamp-if-done t)
-    (setq org-agenda-todo-ignore-deadlines (quote near))
-    (setq org-agenda-todo-ignore-scheduled (quote future))
-    ; Agenda soll in ganzem Frame starten
-(setq org-agenda-window-frame-fractions '(1.0 . 1.0))
-(setq org-agenda-custom-commands
-      '(("d" "Deadlines" agenda ""
-         ((org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
-          (org-agenda-ndays 1)
-          (org-deadline-warning-days 60)
-          (org-agenda-time-grid nil)))
-	("t" "Todos"
-	 ((todo "TODO")
-          (todo "DELEGIERT") 
-	  (todo "WARTEN")))
-	("k" "Kontexte"
-         ((tags-todo "ZUHAUSE")
-          (tags-todo "INSTITUT")
-          (tags-todo "UB")
-          (tags-todo "STADT")
-          (tags-todo "COMPUTER")
-          (tags-todo "EMAIL")
-          (tags-todo "TELEPHON")
-          (tags-todo "ONLINE")
-          (tags-todo "HIWI")
-          (tags-todo "HCB")))
-	("n" "Notizen"
-         ((tags-todo "NOTIZ")))
-	("I" "Import diary from iCal" agenda ""
-         ((org-agenda-mode-hook
-           (lambda ()
-
-             (org-mac-iCal)))))
-        ))
-        (setq org-agenda-text-search-extra-files '(agenda-archives))
-(setq org-icalendar-include-todo t)
-(setq org-icalendar-use-deadline (quote (event-if-todo event-if-not-todo)))
-(setq org-icalendar-use-scheduled (quote (event-if-todo event-if-not-todo)))
-(setq org-icalendar-categories (quote (all-tags)))
-(setq org-icalendar-include-body 2000)
-(setq org-agenda-add-entry-text-maxlines 20)
-(setq org-agenda-include-diary t)
-;; Aktuelle Zeile in der Agenda hervorheben
-(add-hook 'org-agenda-mode-hook '(lambda () (hl-line-mode 1 )))
-
-;; (setq org-agenda-format-date 
-;;  "%d.%m.%Y ---------------------------------------------------------------------")
-(setq org-agenda-date-weekend (quote (:foreground "Yellow" :weight bold)))
+      (define-key org-mode-map (kbd "C-M-w") 'append-next-kill)
     #+end_src
-*** Taking notes
-#+begin_src emacs-lisp
-  (setq org-directory "~/Private/ORG")
-  (setq org-default-notes-file "~/Private/ORG/notes.org")
-#+end_src
 
-**** Templates
+    I don't use the diary, but I do use the clock a lot.
 
-     I use =org-capture= templates to quickly jot down tasks, notes, and other semi-structured pieces of information.
-#+begin_src emacs-lisp    
-     (setq org-capture-templates (quote (("t" "Todo" entry (file+headline "~/Private/ORG/gtd.org" "Eingang") "* TODO %?   %^G
- %i %u
-" :prepend t) ("l" "Todo mit Link auf Buffer" entry (file+headline "~/Private/ORG/gtd.org" "Eingang") "* TODO %?   %^G
- %a %u
-" :prepend t) ("e" "Email-Todo" entry (file+headline "~/Private/ORG/gtd.org" "Emails") "* TODO %? 
-
-  DEADLINE: %^t   
-%a %i
-" :prepend t) ("M" "Merken" entry (file+headline "~/Private/ORG/notizen.org" "Merken") "* %? :NOTIZ:
- %c 
- Notiert am %u" :prepend t) ("I" "Idee" entry (file+headline "~/Private/ORG/notizen.org" "Neue Ideen") "* %? :IDEE:
- %c 
- Notiert am %u" :prepend t) ("B" "Bookmark" entry (file+headline "~/Private/ORG/notizen.org" "Lesezeichen") "* %? %^G
- Notiert am %u" :prepend t))))
-#+end_src
-**** Refiling
-    
-    When I use =org-refile= to organize my notes, I like seeing the
-    latest entries on top.
-    
     #+begin_src emacs-lisp
-      (setq org-refile-use-outline-path (quote file))
-; Targets include this file and any file contributing to the agenda - up to 5 levels deep
-(setq org-refile-targets (quote ((org-agenda-files :maxlevel . 5) (nil :maxlevel . 5))))
-
-; Targets start with the file name - allows creating level 1 tasks
-(setq org-refile-use-outline-path (quote file))
-
-; Targets complete in steps so we start with filename, TAB shows the next level of targets etc 
-(setq org-outline-path-complete-in-steps t)
-(setq org-refile-targets (quote (("gtd.org" :maxlevel . 3) 
-                              ("notizen.org" :level . 2))))
+      (define-key org-agenda-mode-map "i" 'org-agenda-clock-in)
     #+end_src
     
-*** Footnotes
-    #+begin_src emacs-lisp
-    (setq org-footnote-auto-adjust t)
-    #+end_src
-*** Drawers und Logging
-    #+begin_src emacs-lisp
-    (setq org-drawers (quote ("PROPERTIES" "CLOCKTABLE" "LOGBOOK" "CLOCK")))
-    (setq org-clock-into-drawer "CLOCK")
-    #+end_src
 *** Managing tasks
 **** Track TODO state
      #+begin_src emacs-lisp
-(setq org-todo-keywords (quote ((sequence "TODO(t)" "BEGONNEN(b!)" "|" "ZUDELEGIEREN(z@/!)" "DELEGIERT(d@/!)" "WARTEN(w@/!)" "ERLEDIGT(e!)")
- (sequence  "IRGENDWANN(I@/!)" "OFFEN(O@/!)" "|" "GESTRICHEN(g@/!)")
-(sequence "|" "DONE(f)"))))
-
-(setq org-todo-keyword-faces (quote (("TODO" :foreground "tomato" :weight bold)
- ("BEGONNEN" :foreground "LightSkyBlue3" :weight bold)
- ("ERLEDIGT" :foreground "grey50" :weight bold)
- ("WARTEN" :foreground "indian red" :weight bold)
- ("DELEGIERT" :foreground "royal blue" :weight bold)
- ("IRGENDWANN" :foreground "lime green" :weight bold)
- ("GESTRICHEN" shadow)
- ("OFFEN" :foreground "blue" :weight bold))))
+       (setq org-todo-keywords (quote ((sequence "TODO(t)" "BEGONNEN(b!)" "|" "ZUDELEGIEREN(z@/!)" "DELEGIERT(d@/!)" "WARTEN(w@/!)" "ERLEDIGT(e!)")
+                                       (sequence  "IRGENDWANN(I@/!)" "OFFEN(O@/!)" "|" "GESTRICHEN(g@/!)")
+                                       (sequence "|" "DONE(f)"))))
+       (setq org-todo-keyword-faces (quote (("TODO" :foreground "tomato" :weight bold)
+                                            ("BEGONNEN" :foreground "LightSkyBlue3" :weight bold)
+                                            ("ERLEDIGT" :foreground "grey50" :weight bold)
+                                            ("WARTEN" :foreground "indian red" :weight bold)
+                                            ("DELEGIERT" :foreground "royal blue" :weight bold)
+                                            ("IRGENDWANN" :foreground "lime green" :weight bold)
+                                            ("GESTRICHEN" shadow)
+                                            ("OFFEN" :foreground "blue" :weight bold))))
      #+end_src
      
 **** Projects
@@ -441,21 +414,21 @@ I don't use the diary, but I do use the clock a lot.
 **** Tag tasks
      #+begin_src emacs-lisp
        (setq org-tag-alist (quote (("INSTITUT" . ?i)
-                            ("HCB" . ?b)
-                            ("ZUHAUSE" . ?h)
-                            ("HIWI" . ?w)
-			    ("COMPUTER" . ?c)
-			    ("ONLINE" . ?o)
-			    ("TELEPHON" . ?t)
-			    ("STADT" . ?s)
-			    ("UB" . ?u)
-                            ("IDEE" . ?I)
-                            ("NOTIZ" . ?N)
-			    ("BOOKMARK" . ?B)
-                            ("PROJEKT" . ?P))))
-
-; Allow setting single tags without the menu
-(setq org-fast-tag-selection-single-key (quote expert))
+                                   ("HCB" . ?b)
+                                   ("ZUHAUSE" . ?h)
+                                   ("HIWI" . ?w)
+                                   ("COMPUTER" . ?c)
+                                   ("ONLINE" . ?o)
+                                   ("TELEPHON" . ?t)
+                                   ("STADT" . ?s)
+                                   ("UB" . ?u)
+                                   ("IDEE" . ?I)
+                                   ("NOTIZ" . ?N)
+                                   ("BOOKMARK" . ?B)
+                                   ("PROJEKT" . ?P))))
+       
+       ;; Allow setting single tags without the menu
+       (setq org-fast-tag-selection-single-key (quote expert))
      #+end_src
 **** Enable filtering by effort estimates
 
@@ -465,21 +438,21 @@ I don't use the diary, but I do use the clock a lot.
      #+end_src
      
 **** Track time
-
-     #+begin_src emacs-lisp
-     (setq org-clock-idle-time nil)
-     (setq org-log-done 'time)
-     (defadvice org-clock-in (after wicked activate)
-  "Mark STARTED when clocked in"
-  (save-excursion
-    (catch 'exit
-      (org-back-to-heading t)
-      (if (looking-at org-outline-regexp) (goto-char (1- (match-end 0))))
-      (if (looking-at (concat " +" org-todo-regexp "\\( +\\|[ \t]*$\\)"))
-	  (org-todo "STARTED")))))
-#+end_src
-(setq org-clock-idle-time nil)
      
+     #+begin_src emacs-lisp
+       (setq org-clock-idle-time nil)
+       (setq org-log-done 'time)
+       (defadvice org-clock-in (after wicked activate)
+         "Mark STARTED when clocked in"
+         (save-excursion
+           (catch 'exit
+             (org-back-to-heading t)
+             (if (looking-at org-outline-regexp) (goto-char (1- (match-end 0))))
+             (if (looking-at (concat " +" org-todo-regexp "\\( +\\|[ \t]*$\\)"))
+                 (org-todo "STARTED")))))
+       
+       (setq org-clock-idle-time nil)
+     #+end_src     
 **** Habits
 
      I like using org-habits to track consistency. My task names tend
@@ -489,6 +462,157 @@ I don't use the diary, but I do use the clock a lot.
      #+begin_src emacs-lisp
      (setq org-habit-graph-column 80)
      #+end_src
+*** MobileOrg for Android
+
+    I've been playing around with MobileOrg so that I can review my
+    agenda and capture notes on my smartphone. My main Org file is too
+    big to open easily there, though.
+    
+    #+begin_src emacs-lisp
+      (require 'org-mobile)
+      (setq org-mobile-directory "/Volumes/webdav.smartdrive.web.de/orgmode")
+      (setq org-mobile-inbox-for-pull "/Volumes/webdav.smartdrive.web.de/orgmode/inbox.org")
+      (setq org-mobile-files (quote ("~/Private/ORG/ss2012.org" "~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org" "~/Documents/projekte/aw_III_4/todo.org")))
+    #+end_src
+
+*** Modules
+    Org has a whole bunch of optional modules. These are the ones I'm
+    currently experimenting with.
+    #+begin_src emacs-lisp
+      (setq org-modules '(org-info
+                          org-jsinfo
+                          org-habit
+                          org-mouse
+                          org-annotate-file
+                          org-eval
+                          org-expiry
+                          org-interactive-query
+                          org-mac-message
+                          org-man
+                          org-bibtex
+                          org-panel
+                          org-screen
+                          org-toc))
+    #+end_src
+*** O-Blog
+    Initialisierung für O-Blog
+    #+begin_src emacs-lisp
+      (add-to-list 'load-path "~/.emacs.d/o-blog")
+      (require 'o-blog)
+    #+end_src
+*** Orgmode für .org-Dateien
+    #+begin_src emacs-lisp
+      (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+    #+end_src
+*** Orgmode und BibTeX
+    #+begin_src emacs-lisp
+      (require 'org-exp-bibtex)
+    #+end_src
+*** Orgmode und LaTeX
+    #+begin_src emacs-lisp
+      (setq org-latex-to-pdf-process (list "latexmk -output-directory %o -xelatex %f"))
+    #+end_src
+*** Publishing
+    Timestamps and section numbers make my published files look more
+    complicated than they are. Let's turn them off by default.
+    #+begin_src emacs-lisp
+      (setq org-export-with-section-numbers nil)
+      (setq org-html-include-timestamps nil)
+    #+end_src
+
+    Publishing:
+
+    #+begin_src emacs-lisp
+      (require 'org-publish)
+      (setq org-publish-project-alist
+            '(
+              ("privat-notes"
+               :base-directory "~/Private/Homepage"
+               :base-extension "org"
+               :publishing-directory "~/Sites/Privat"
+               :recursive t
+               :publishing-function org-publish-org-to-html
+               :headline-levels 4             ; Just the default for this project.
+               :toc nil
+               :language de
+               :author "Annette von Stockhausen <annette@vonstockhausen.eu>"
+               :html-postamble "<p>Hilfe: »?« eingeben</p><p class=\"date\">Zuletzt geändert: %d von %a</p><p class=\"creator\">Generated by %c, hosted on <a href='https://bitbucket.org/pharos/pharos.bitbucket.org'>Bitbucket</a></p><p><a rel=\"license\" href=\"http://creativecommons.org/licenses/by-sa/3.0/de/\"><img alt=\"Creative Commons Lizenzvertrag\" style=\"border-width:0\" src=\"http://i.creativecommons.org/l/by-sa/3.0/de/80x15.png\" /></a></p>"
+               :auto-preamble t
+               )
+              ("privat-static"
+               :base-directory "~/Private/Homepage"
+               :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|org"
+               :publishing-directory "~/Sites/Privat"
+               :recursive t
+               :publishing-function org-publish-attachment
+               )
+              ("privat" :components ("privat-notes" "privat-static"))
+              ))
+     #+end_src
+
+*** RefTeX in Orgmode
+    #+begin_src emacs-lisp
+      (defun org-mode-reftex-setup ()
+        (load-library "reftex")
+        (and (buffer-file-name)
+             (file-exists-p (buffer-file-name))
+             (reftex-parse-all))
+        (define-key org-mode-map (kbd "C-c )") 'reftex-citation)
+        )
+      (add-hook 'org-mode-hook 'org-mode-reftex-setup)
+    #+end_src
+*** Tabellen
+**** org-collector: collects headline properties into tables with optional pre-processing
+     #+begin_src emacs-lisp 
+       (require 'org-collector)
+     #+end_src
+*** Taking notes
+    #+begin_src emacs-lisp
+      (setq org-directory "~/Private/ORG")
+      (setq org-default-notes-file "~/Private/ORG/notes.org")
+    #+end_src
+
+**** Templates
+
+     I use =org-capture= templates to quickly jot down tasks, notes, and other semi-structured pieces of information.
+     #+begin_src emacs-lisp    
+       (setq org-capture-templates (quote (("t" "Todo" entry (file+headline "~/Private/ORG/gtd.org" "Eingang") "* TODO %?   %^G
+        %i %u
+       " :prepend t)
+                                           ("l" "Todo mit Link auf Buffer" entry (file+headline "~/Private/ORG/gtd.org" "Eingang") "* TODO %?   %^G
+        %a %u
+       " :prepend t)
+                                           ("e" "Email-Todo" entry (file+headline "~/Private/ORG/gtd.org" "Emails") "* TODO %? 
+       
+         DEADLINE: %^t   
+       %a %i
+       " :prepend t)
+                                           ("M" "Merken" entry (file+headline "~/Private/ORG/notizen.org" "Merken") "* %? :NOTIZ:
+        %c 
+        Notiert am %u" :prepend t)
+                                           ("I" "Idee" entry (file+headline "~/Private/ORG/notizen.org" "Neue Ideen") "* %? :IDEE:
+        %c 
+        Notiert am %u" :prepend t)
+                                           ("B" "Bookmark" entry (file+headline "~/Private/ORG/notizen.org" "Lesezeichen") "* %? %^G
+        Notiert am %u" :prepend t))))
+     #+end_src
+**** Refiling
+    
+     When I use =org-refile= to organize my notes, I like seeing the
+     latest entries on top.
+    
+    #+begin_src emacs-lisp
+      (setq org-refile-use-outline-path (quote file))
+      ;; Targets include this file and any file contributing to the agenda - up to 5 levels deep
+      (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 5) (nil :maxlevel . 5))))
+      ;; Targets start with the file name - allows creating level 1 tasks
+      (setq org-refile-use-outline-path (quote file))
+      ;; Targets complete in steps so we start with filename, TAB shows the next level of targets etc 
+      (setq org-outline-path-complete-in-steps t)
+      (setq org-refile-targets (quote (("gtd.org" :maxlevel . 3) 
+                                       ("notizen.org" :level . 2))))
+    #+end_src
+    
 *** Viewing, navigating, and editing the Org tree
 
     #+begin_src emacs-lisp
@@ -500,405 +624,225 @@ I don't use the diary, but I do use the clock a lot.
     #+begin_src emacs-lisp
       (define-key org-mode-map (kbd "C-c k") 'org-cut-subtree)
       (setq org-yank-adjusted-subtrees t)  
-#+end_src
-*** Publishing
-Timestamps and section numbers make my published files look more
-complicated than they are. Let's turn them off by default.
-#+begin_src emacs-lisp
-(setq org-export-with-section-numbers nil)
-(setq org-html-include-timestamps nil)
-#+end_src
-
-Private Homepage veröffentlichen
-#+begin_src emacs-lisp
-   (require 'org-publish)
-(setq org-publish-project-alist
-      '(
-("privat-notes"
- :base-directory "~/Private/Homepage"
- :base-extension "org"
- :publishing-directory "~/Sites/Privat"
- :recursive t
- :publishing-function org-publish-org-to-html
- :headline-levels 4             ; Just the default for this project.
- :toc nil
- :language de
- :author "Annette von Stockhausen <annette@vonstockhausen.eu>"
- :html-postamble "<p>Hilfe: »?« eingeben</p><p class=\"date\">Zuletzt geändert: %d von %a</p><p class=\"creator\">Generated by %c, hosted on <a href='https://bitbucket.org/pharos/pharos.bitbucket.org'>Bitbucket</a></p><p><a rel=\"license\" href=\"http://creativecommons.org/licenses/by-sa/3.0/de/\"><img alt=\"Creative Commons Lizenzvertrag\" style=\"border-width:0\" src=\"http://i.creativecommons.org/l/by-sa/3.0/de/80x15.png\" /></a></p>"
- :auto-preamble t
- )
-("privat-static"
- :base-directory "~/Private/Homepage"
- :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|org"
- :publishing-directory "~/Sites/Privat"
- :recursive t
- :publishing-function org-publish-attachment
- )
-("privat" :components ("privat-notes" "privat-static"))
-      ))
-#+end_src
-
-*** O-Blog
-    Initialisierung für O-Blog
-#+begin_src emacs-lisp
-(add-to-list 'load-path "~/.emacs.d/o-blog")
-(require 'o-blog)
-#+end_src
-*** MobileOrg for Android
-
-    I've been playing around with MobileOrg so that I can review my
-    agenda and capture notes on my smartphone. My main Org file is too
-    big to open easily there, though.
-    
-#+begin_src emacs-lisp
-    (require 'org-mobile)
-    (setq org-mobile-directory "/Volumes/webdav.smartdrive.web.de/orgmode")
-    (setq org-mobile-inbox-for-pull "/Volumes/webdav.smartdrive.web.de/orgmode/inbox.org")
-    (setq org-mobile-files (quote ("~/Private/ORG/ss2012.org" "~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org" "~/Documents/projekte/aw_III_4/todo.org")))
-#+end_src
-
-*** Ditaa
-    #+begin_src emacs-lisp
-    (setq org-ditaa-jar-path "~/.emacs.d/contrib/scripts/ditaa.jar")
-    (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
-    (org-babel-do-load-languages
-    'org-babel-load-languages
-    '((emacs-lisp . nil)
-    (R . t)
-    (ditaa . t)))
-    ; Do not prompt to confirm evaluation
-    ; This may be dangerous - make sure you understand the consequences
-    ; of setting this -- see the docstring for details
-    (setq org-confirm-babel-evaluate nil)
     #+end_src
-*** Export
-**** Allgemeine Einstellungen
-     #+begin_src emacs-lisp
-     (setq org-export-with-drawers nil)
-     #+end_src
-**** LaTeX-Beamer
-     #+begin_src emacs-lisp
-     (setq org-beamer-outline-frame-title "Themen")
-     #+end_src
-**** LaTeX allgemein
-     #+begin_src emacs-lisp
-      (setq org-export-latex-classes (quote (("article" "\\documentclass[11pt,a4paper]{article}\\usepackage[margin=2cm]{geometry}\\usepackage{fontspec,xkeyval}\\usepackage[babelshorthands]{polyglossia}\\setdefaultlanguage{german}\\setotherlanguage[variant=poly]{greek}\\setotherlanguages{french,english,latin}\\setromanfont[Mapping=tex-text,Numbers=Lowercase,Ligatures=Common]{Arno Pro}" ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) ("report" "\\documentclass[11pt,a4paper]{report}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")) ("book" "\\documentclass[11pt,a4paper,openany]{memoir}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")) ("org-article" "\\documentclass{org-article}[NO-DEFAULT-PACKAGES]
-               [PACKAGES]
-               [EXTRA]" ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) ("koma-article" "\\documentclass{scrartcl}" ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) ("koma-report" "\\documentclass{scrreprt}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) ("beamer" "\\documentclass{beamer}\\usepackage{fontspec,xkeyval}\\usepackage[babelshorthands]{polyglossia}\\setdefaultlanguage{german}\\setotherlanguage[variant=poly]{greek}\\setotherlanguages{french,english}\\setromanfont[Mapping=tex-text,Numbers=Lowercase,Ligatures=Common]{Adobe
-Garamond Pro}\\setsansfont[Mapping=tex-text,Numbers=Lowercase,Scale=MatchUppercase]{Iwona}\\newfontfamily\\greekfont[Mapping=tex-text,Script=Greek,Ligatures=Common,Scale=MatchLowercase]{GFS
-Neohellenic}" org-beamer-sectioning))))
- (setq org-export-latex-date-format "%d. %B %Y")
- (setq org-export-latex-default-packages-alist (quote (("" "graphicx" t) ("" "longtable" t) ("" "hyperref" t) "\\tolerance=1000")))
- (setq org-export-latex-emphasis-alist (quote (("*" "\\textbf{%s}" nil) ("/" "\\emph{%s}" nil) ("_" "\\underline{%s}" nil) ("+" "\\st{%s}" nil) ("=" "\\verb" t) ("~" "\\verb" t) ("@" "\\alert{%s}" nil))))
- (setq org-export-latex-hyperref-format "\\ref{%s}")
- (setq org-export-latex-listings t)
- (setq org-export-latex-todo-keyword-markup (quote (("TODO" . "{\\color{red}{\\sffamily\\textbf{%s}}}"))))
-     #+end_src
-**** HTML
-     #+begin_src emacs-lisp
-     (require 'htmlize)
-     (setq org-emphasis-alist (quote (("*" bold "<b>" "</b>") ("/" italic "<i>" "</i>") ("_" underline "<span style=\"text-decoration:underline;\">" "</span>") ("=" org-code "<code>" "</code>" verbatim) ("~" org-verbatim "<code>" "</code>" verbatim) ("+" (:strike-through t) "<del>" "</del>") ("@" org-warning "<b>" "</b>"))))
- (setq org-export-html-home/up-format "<div id=\"org-div-home-and-up\" style=\"text-align:right;font-size:70%%;white-space:nowrap;\">
- <a accesskey=\"h\" href=\"%s\"> UP </a>
- |
- <a accesskey=\"H\" href=\"%s\"> HOME </a>
-</div>")
- (setq org-export-html-postamble t)
- (setq org-export-html-postamble-format (quote (("de" "<p class=\"author\">Autor: %e</p>
-<p class=\"date\">Datum: %d</p>
-<p class=\"creator\">Generated by %c</p>"))))
-     #+end_src
-**** S5-Präsentation
-     #+begin_src emacs-lisp
-(setq org-s5-theme "advanced")
+*** Weitere Orgmode-Einstellungen
+**** Ido-style Completion
+     I also like using =ido=-style completion.
 
-(defvar org-s5-title-string-fmt "<h1>%author - %title</h1>"
-  "Format template to specify title string.  Completed using `org-fill-template'.
-Optional keys include %author, %title and %date.")
-
-(defvar org-s5-title-page-fmt (mapconcat #'identity
-                                         '("<div class=\"slide\">"
-                                           "<h1>%title</h1>"
-                                           "<h1>%author</h1>"
-                                           "<h1>%date</h1>"
-                                           "</div>")
-                                         "\n")
-  "Format template to specify title page.  Completed using `org-fill-template'.
-Optional keys include %author, %title and %date.")
-
-(defun org-export-as-s5
-  (arg &optional hidden ext-plist to-buffer body-only pub-dir)
-  "Wrap `org-export-as-html' in setting for S5 export."
-  (interactive "P")
-  (flet ((join (lst) (mapconcat #'identity lst "\n"))
-         (sheet (href media id)
-                (org-fill-template
-                 (concat "<link rel=\"stylesheet\" href=\"%href\""
-                         " type=\"text/css\" media=\"%media\" id=\"%id\" />")
-                 `(("href" . ,href)
-                   ("media" . ,media)
-                   ("id" . ,id)))))
-    (let ((org-export-html-style-extra
-           (join `("<!-- configuration parameters -->"
-                   "<meta name=\"defaultView\" content=\"slideshow\" />"
-                   "<meta name=\"controlVis\" content=\"hidden\" />"
-                   "<!-- style sheet links -->"
-                   ,(sheet (concat "ui/" org-s5-theme "/slides.css")
-                           "projection" "slideProj")
-                   ,(sheet "ui/default/outline.css" "screen" "outlineStyle")
-                   ,(sheet "ui/default/print.css" "print" "slidePrint")
-                   ,(sheet "ui/default/opera.css" "projection" "operaFix")
-                   "<!-- S5 JS -->"
-                   ,(concat "<script src=\"ui/default/slides.js\" "
-                            "type=\"text/javascript\"></script>"))))
-          (org-export-html-toplevel-hlevel 1)
-          (org-export-preprocess-hook
-           (list
-            (lambda ()
-              (let ((class "slide"))
-                (org-map-entries
-                 (lambda ()
-                   (save-excursion
-                     (org-back-to-heading t)
-                     (when (= (car (org-heading-components)) 1)
-                       (put-text-property (point-at-bol) (point-at-eol)
-                                          'html-container-class class)))))))))
-          (org-export-html-final-hook
-           (list
-            (lambda ()
-              (save-excursion
-                (replace-regexp
-                 (regexp-quote "<div id=\"content\">")
-                 (let ((info `(("author" . ,author)
-                               ("title"  . ,title)
-                               ("date"   . ,(substring date 0 10)))))
-                   (join `("<div class=\"layout\">"
-                           "<div id=\"controls\"><!-- no edit --></div>"
-                           "<div id=\"currentSlide\"><!-- no edit --></div>"
-                           "<div id=\"header\"></div>"
-                           "<div id=\"footer\">"
-                           ,(org-fill-template org-s5-title-string-fmt info)
-                           "</div>"
-                           "</div>"
-                           ""
-                           "<div class=\"presentation\">"
-                           ,(org-fill-template org-s5-title-page-fmt info)))))))
-            (lambda ()
-              (save-excursion
-                (replace-regexp
-                 (regexp-quote "<div id=\"table-of-contents\">")
-                 "<div id=\"table-of-contents\" class=\"slide\">"))))))
-      (org-export-as-html arg hidden ext-plist to-buffer body-only pub-dir))))
-     #+end_src
-**** HTML5-Präsentation
      #+begin_src emacs-lisp
-     (require 'org-html5presentation)
+       (setq org-completion-use-ido t)
      #+end_src
-*** Orgmode und LaTeX
+
+** Markdown
+*** Markdown für .md-Dateien
     #+begin_src emacs-lisp
-    (setq org-latex-to-pdf-process (list "latexmk -pdflatex=xelatex -pdf %f"))
+    (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+    (setq markdown-command "multimarkdown")
     #+end_src
-*** RefTeX in Orgmode
-    #+begin_src emacs-lisp
-    (defun org-mode-reftex-setup ()
-    (load-library "reftex")
-    (and (buffer-file-name)
-    (file-exists-p (buffer-file-name))
-    (reftex-parse-all))
-    (define-key org-mode-map (kbd "C-c )") 'reftex-citation)
-    )
-    (add-hook 'org-mode-hook 'org-mode-reftex-setup)
-    #+end_src
-*** Orgmode und BibTeX
-    #+begin_src emacs-lisp
-    (require 'org-exp-bibtex)
-    #+end_src
-*** Tabellen
-**** org-collector: collects headline properties into tables with optional pre-processing
-     #+begin_src emacs-lisp 
-     (require 'org-collector)
-     #+end_src
+
+** Pandoc
+   #+begin_src emacs-lisp
+   (setq pandoc-binary "/usr/local/bin/pandoc")
+   #+end_src
 ** LaTeX
 *** Syntax-Highlighting
     #+begin_src emacs-lisp
-    (setq LaTeX-paragraph-commands (quote ("pstart" "pend" "kap")))
-    (setq font-latex-match-function-keywords (quote (("beginnumbering" "") ("endnumbering" "") ("hist" "{"))))
-    (setq font-latex-match-reference-keywords (quote (("edindex" "[{") ("esindex" "{") ("enindex" "{") ("nindex" "{") ("pindex" "{") ("qindex" "{") ("aindex" "{") ("cindex" "{") ("bindex" "{") ("grindex" "{") ("sindex" "{") ("specialindex" "{{{") ("editioncite" "*[{") ("footcite" "*[{"))))
-    (setq font-latex-match-textual-keywords (quote (("var" "{{") ("varlat" "{{") ("varabb" "{{") ("varom" "{{") ("varomabb" "{{{") ("varadd" "{{") ("vartr" "{{") ("bibel" "{{") ("bibelcf" "{{") ("bezeugung" "{") ("bezeugungpart" "{{"))))
+      (setq LaTeX-paragraph-commands (quote ("pstart" "pend" "kap")))
+      (setq font-latex-match-function-keywords (quote (("beginnumbering" "") ("endnumbering" "") ("hist" "{"))))
+      (setq font-latex-match-reference-keywords (quote (("edindex" "[{") ("esindex" "{") ("enindex" "{") ("nindex" "{") ("pindex" "{") ("qindex" "{") ("aindex" "{") ("cindex" "{") ("bindex" "{") ("grindex" "{") ("sindex" "{") ("specialindex" "{{{") ("editioncite" "*[{") ("footcite" "*[{"))))
+      (setq font-latex-match-textual-keywords (quote (("var" "{{") ("varlat" "{{") ("varabb" "{{") ("varom" "{{") ("varomabb" "{{{") ("varadd" "{{") ("vartr" "{{") ("bibel" "{{") ("bibelcf" "{{") ("bibelcfl" "{{{") ("bezeugung" "{") ("bezeugungpart" "{{"))))
     #+end_src
 *** RefTeX
     #+begin_src emacs-lisp
-    (setq reftex-plug-into-AUCTeX t) 
-    (setq reftex-enable-partial-scans t)
-    (setq reftex-use-external-file-finders t)
-    (setq reftex-external-file-finders
-      '(("tex" . "kpsewhich -format=.tex %f")
-        ("bib" . "kpsewhich -format=.bib %f")))
-    (setq reftex-default-bibliography (quote ("/Users/stockhausen/Documents/Bibliographie.bib")))
+      (setq reftex-plug-into-AUCTeX t) 
+      (setq reftex-enable-partial-scans t)
+      (setq reftex-use-external-file-finders t)
+      (setq reftex-external-file-finders
+        '(("tex" . "kpsewhich -format=.tex %f")
+          ("bib" . "kpsewhich -format=.bib %f")))
+      (setq reftex-default-bibliography (quote ("~/Documents/Bibliographie.bib")))
     #+end_src
 *** Reftex-Index
     #+begin_src emacs-lisp
-    (setq reftex-index-macros
-    '(("\\pindex{*}" "personen" ?p "" nil nil)
-    ("\\aindex{*}" "antik" ?a "" nil nil)
-    ("\\cindex{*}" "codex" ?c "" nil nil)
-    ("\\bindex{*}" "bibel" ?b "" nil nil)
-    ("\\qindex{*}" "quellen" ?q "" nil nil)
-    ("\\sindex{*}" "synoden" ?s "" nil nil)
-    ("\\nindex{*}" "namen" ?n "" nil nil)
-    ("\\grindex{*}" "gr" ?g "" nil nil)))
+      (setq reftex-index-macros
+            '(("\\pindex{*}" "personen" ?p "" nil nil)
+              ("\\aindex{*}" "antik" ?a "" nil nil)
+              ("\\cindex{*}" "codex" ?c "" nil nil)
+              ("\\bindex{*}" "bibel" ?b "" nil nil)
+              ("\\qindex{*}" "quellen" ?q "" nil nil)
+              ("\\sindex{*}" "synoden" ?s "" nil nil)
+              ("\\nindex{*}" "namen" ?n "" nil nil)
+              ("\\grindex{*}" "gr" ?g "" nil nil)))
     #+end_src
 *** Reftex-Cite
     #+begin_src emacs-lisp
-(setq reftex-cite-format
-'((?\C-m . "\\cite[]{%l}")
-(?f . "\\footcite[][]{%l}")
-(?e . "\\editioncite[]{%l}")
-(?t . "\\textcite[]{%l}")
-(?p . "\\parencite[]{%l}")
-(?o . "\\citepr[]{%l}")
-(?n . "\\nocite{%l}")))
-(setq reftex-cite-prompt-optional-args t)
+      (setq reftex-cite-format
+            '((?\C-m . "\\cite[]{%l}")
+              (?f . "\\footcite[][]{%l}")
+              (?e . "\\editioncite[]{%l}")
+              (?t . "\\textcite[]{%l}")
+              (?p . "\\parencite[]{%l}")
+              (?o . "\\citepr[]{%l}")
+              (?n . "\\nocite{%l}")))
+      (setq reftex-cite-prompt-optional-args t)
     #+end_src
 *** Allgemein
     #+begin_src emacs-lisp
-    (setq TeX-open-quote "»")
-    (setq TeX-close-quote "«")
-    (setq font-latex-quotes (quote german))
-    (add-hook 'LaTeX-mode-hook 'turn-on-auto-fill)
-    (setq TeX-source-correlate-mode t)
-    (setq TeX-view-program-list (quote (("Preview" "open -a Preview.app %o") ("Skim" ("open -a Skim.app %o")))))
-    (setq TeX-view-program-selection (quote ((output-dvi "open")
-    (output-pdf-skim-running "Skim") (output-pdf "Skim") (output-html "open"))))
-    (setq LaTeX-command "latex -synctex=1")
-    (setq LaTeX-csquotes-close-quote "}")
-    (setq LaTeX-csquotes-open-quote "\\enquote{")
-    (setq TeX-PDF-mode t)
-    (setq TeX-default-macro "footnote")
-    (setq TeX-engine (quote xetex))
+      (setq TeX-open-quote "»")
+      (setq TeX-close-quote "«")
+      (setq font-latex-quotes (quote german))
+      (setq LaTeX-csquotes-close-quote "}")
+      (setq LaTeX-csquotes-open-quote "\\enquote{")
+      (setq TeX-PDF-mode t)
+      (setq TeX-default-macro "footnote")
+      (add-hook 'LaTeX-mode-hook 'turn-on-auto-fill)
+      (setq TeX-source-correlate-mode t)
+      ;; use Skim as default pdf viewer
+      ;; Skim's displayline is used for forward search (from .tex to .pdf)
+      (setq TeX-view-program-list
+            '(("Skim" 
+               "/Applications/Skim.app/Contents/SharedSupport/displayline -g %n %o %b"))
+            TeX-view-program-selection
+            '((output-pdf "Skim")))
+      ;; TeX-Commands
+      (setq TeX-command-list (quote (("TeX" "%(PDF)%(tex) %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil (plain-tex-mode texinfo-mode ams-tex-mode) :help "Run plain TeX")
+                                     ("LaTeX" "%`%l%(mode)%' %t" TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX")
+                                     ("XeLaTeX" "xelatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run XeLaTeX")
+                                     ("Latexmk (PDF)" "latexmk -pdflatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run PDFLaTeX with latexmk")
+                                     ("Latexmk (XeLaTeX)" "latexmk -xelatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run XeLaTeX with latexmk")
+                                     ("BibTeX" "biber %s" TeX-run-BibTeX nil t :help "Run BibTeX")
+                                     ("View" "%V" TeX-run-discard-or-function t t :help "Run Viewer")
+                                     ("Makeinfo" "makeinfo %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with Info output")
+                                     ("Makeinfo HTML" "makeinfo --html %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with HTML output")
+                                     ("ConTeXt" "texexec --once --texutil %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt once")
+                                     ("ConTeXt Full" "texexec %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt until completion")
+                                     ("Print" "%p" TeX-run-command t t :help "Print the file")
+                                     ("Queue" "%q" TeX-run-background nil t :help "View the printer queue" :visible TeX-queue-command)
+                                     ("Check" "lacheck %s" TeX-run-compile nil (latex-mode) :help "Check LaTeX file for correctness")
+                                     ("Spell" "(TeX-ispell-document \"\")" TeX-run-function nil t :help "Spell-check the document")
+                                     ("Clean" "TeX-clean" TeX-run-function nil t :help "Delete generated intermediate files")
+                                     ("Clean All" "(TeX-clean t)" TeX-run-function nil t :help "Delete generated intermediate and output files")
+                                     ("Other" "" TeX-run-command t t :help "Run an arbitrary command"))))
     #+end_src
 ** Emacs
 *** Allgemeine Einstellungen
     #+begin_src emacs-lisp
- (setq cua-mode t)
- (setq inhibit-startup-screen t)
- (setq server-mode t)
- (tool-bar-mode 0)
- (setq x-select-enable-clipboard t)
-    (setq tab-width 4)
-(show-paren-mode t) ;highlight matching parentheses
-  (setq show-paren-delay 0)
-  ;; global visual line mode
-  (global-visual-line-mode 1) 
-  ;; Enable font-lock (syntax highlighting) in modes which support it
-  (global-font-lock-mode t)
-  (setq font-lock-maximum-decoration t)
-(setenv "PATH" (concat "/usr/texbin:" (getenv "PATH")))
-(add-hook 'text-mode-hook 'table-recognize)
-
-;; Maximum colors
-(setq font-lock-maximum-decoration t)
-
-;; set current buffer's filename, and full path in titlebar
-(setq frame-title-format '((buffer-file-name ": %f")))
-
-  ;; Show path info in buffers with otherwise identical filenames
-  (require 'uniquify)
-  (setq uniquify-buffer-name-style 'post-forward)
-
-  ;; Make very frequent autosaves
-  (setq auto-save-interval 5)
-
-  ;; No beep or visual bell, please
-  (defun easymacs-no-beep ())
-  (setq ring-bell-function 'easymacs-no-beep)
-
-  ;; Make searches case-insensitive
-  (set-default 'case-fold-search t)
-
-  ;; Make all backups in a single directory
-  (when (boundp 'backup-directory-alist)
-    (let ((dir (expand-file-name "~/.emacs-backups")))
-      (or (file-directory-p dir) (make-directory dir))
-      (setq backup-directory-alist `(("." . ,dir)))))
-  
-  ;; Strip CTRL-M from Shell output
-  (add-hook 'comint-output-filter-functions 'shell-strip-ctrl-m nil t)
-
-
-  ;; Use dialog boxes, if available
-  (setq use-dialog-box t)
-
- ;; Paste at cursor, rather than pointer
-  (setq mouse-yank-at-point t)
-
-  ;; For <M-delete> to work properly
-  (setq kill-whole-line t)
-
-  ;; Enable recently-opened files menu
-  (setq recentf-auto-cleanup 'never) ;; disable before we start recentf!
-  (recentf-mode 1)
-  (setq recentf-max-menu-items 30)
-  (setq recentf-max-saved-items 500)
-  (setq recentf-exclude '("[.]bm-repository$" "[.]tidyrc$"
-                          "^temp-tidy-" "[.]bmk$" "[.]abbrev_defs"
-                          "[.]elc$" "^/tmp/mutt" "/usr/dict/words"))
-
+      (setq cua-mode t)
+      (setq inhibit-startup-screen t)
+      (setq server-mode t)
+      (tool-bar-mode 0)
+      (setq x-select-enable-clipboard t)
+      (setq tab-width 4)
+      (show-paren-mode t) ;highlight matching parentheses
+      (setq show-paren-delay 0)
+      ;; global visual line mode
+      (global-visual-line-mode 1) 
+      ;; Enable font-lock (syntax highlighting) in modes which support it
+      (global-font-lock-mode t)
+      (setq font-lock-maximum-decoration t)
+      (setenv "PATH" (concat "/usr/texbin:" (getenv "PATH")))
+      (add-hook 'text-mode-hook 'table-recognize)
+      
+      ;; Maximum colors
+      (setq font-lock-maximum-decoration t)
+      
+      ;; set current buffer's filename, and full path in titlebar
+      (setq frame-title-format '((buffer-file-name ": %f")))
+      
+      ;; Show path info in buffers with otherwise identical filenames
+      (require 'uniquify)
+      (setq uniquify-buffer-name-style 'post-forward)
+      
+      ;; Make very frequent autosaves
+      (setq auto-save-interval 5)
+      
+      ;; No beep or visual bell, please
+      (defun easymacs-no-beep ())
+      (setq ring-bell-function 'easymacs-no-beep)
+      
+      ;; Make searches case-insensitive
+      (set-default 'case-fold-search t)
+      
+      ;; Make all backups in a single directory
+      (when (boundp 'backup-directory-alist)
+        (let ((dir (expand-file-name "~/.emacs-backups")))
+          (or (file-directory-p dir) (make-directory dir))
+          (setq backup-directory-alist `(("." . ,dir)))))
+        
+      ;; Strip CTRL-M from Shell output
+      (add-hook 'comint-output-filter-functions 'shell-strip-ctrl-m nil t)
+      
+      ;; Use dialog boxes, if available
+      (setq use-dialog-box t)
+      
+      ;; Paste at cursor, rather than pointer
+      (setq mouse-yank-at-point t)
+      
+      ;; For <M-delete> to work properly
+      (setq kill-whole-line t)
+      
+      ;; Enable recently-opened files menu
+      (setq recentf-auto-cleanup 'never) ;; disable before we start recentf!
+      (recentf-mode 1)
+      (setq recentf-max-menu-items 30)
+      (setq recentf-max-saved-items 500)
+      (setq recentf-exclude '("[.]bm-repository$" "[.]tidyrc$"
+                              "^temp-tidy-" "[.]bmk$" "[.]abbrev_defs"
+                              "[.]elc$" "^/tmp/mutt" "/usr/dict/words"))
+      
     #+end_src
 *** Mac-Einstellungen
     #+begin_src emacs-lisp
-    (setq ns-alternate-modifier nil)
- (setq ns-right-alternate-modifier (quote none))
- (setq ns-right-command-modifier (quote meta))
+      (setq ns-alternate-modifier nil)
+      (setq ns-right-alternate-modifier (quote none))
+      (setq ns-right-command-modifier (quote meta))
     #+end_src
 *** Undo
     #+begin_src emacs-lisp
-(require 'undo-tree)
-(global-undo-tree-mode 1)
-(defalias 'redo 'undo-tree-redo)
-(global-set-key (kbd "M-z") 'undo) ; 【Alt+z】
-(global-set-key (kbd "M-S-z") 'redo) ; 【Alt+Shift+z】
+      (require 'undo-tree)
+      (global-undo-tree-mode 1)
+      (defalias 'redo 'undo-tree-redo)
     #+end_src
 *** Diff
     #+begin_src emacs-lisp
-    (setq vc-diff-switches '("-b" "-B" "-u"))
-#+end_src
+      (setq vc-diff-switches '("-b" "-B" "-u"))
+    #+end_src
 *** Word-Count
     #+begin_src emacs-lisp
-    ;; Define a count of the number of words in a highlighted region and bind to F6
-;; Handy for forms with word limits and titles with character limits
-(defun word-count (start end)
-  (interactive "r")
-  (let ((words 0) (lines 0) (chars 0))
-    (save-excursion
-      (goto-char start)
-      (while (< (point) end) (forward-word 1) (setq words (1+ words))))
-    (setq lines (count-lines start end) chars (- end start))
-    (message "Region has  %d lines;   %d words;   %d characters."
-             lines words chars)))
-(global-set-key [f10] 'word-count)
-;;
-(defun word-count nil "Count words in buffer" (interactive)
-  (shell-command-on-region (point-min) (point-max) "wc -w"))
+      ;; Define a count of the number of words in a highlighted region and bind to F6
+      ;; Handy for forms with word limits and titles with character limits
+      (defun word-count (start end)
+        (interactive "r")
+        (let ((words 0) (lines 0) (chars 0))
+          (save-excursion
+            (goto-char start)
+            (while (< (point) end) (forward-word 1) (setq words (1+ words))))
+          (setq lines (count-lines start end) chars (- end start))
+          (message "Region has  %d lines;   %d words;   %d characters."
+                   lines words chars)))
+      (global-set-key [f10] 'word-count)
+      ;;
+      (defun word-count nil "Count words in buffer" (interactive)
+        (shell-command-on-region (point-min) (point-max) "wc -w"))
     #+end_src
 *** Custom faces
     #+begin_src emacs-lisp
- (setq custom-enabled-themes (quote (tango)))
-    (custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(font-latex-sectioning-0-face ((t (:weight bold :height 1.2))))
- '(font-latex-sectioning-1-face ((t (:height 1.1))))
- '(font-latex-sectioning-5-face ((((class color) (background dark)) (:foreground "yellow" :weight bold))))
- '(font-latex-verbatim-face ((((class color) (background dark)) (:foreground "burlywood"))))
- '(org-document-title ((((class color) (background dark)) (:foreground "dodger blue" :weight bold :height 1.2))))
- '(org-scheduled ((((class color) (min-colors 88) (background dark)) (:foreground "dodger blue"))))
- '(org-scheduled-previously ((((class color) (min-colors 88) (background dark)) (:foreground "white"))))
- '(org-scheduled-today ((((class color) (min-colors 88) (background dark)) (:foreground "dodger blue"))))
- '(org-upcoming-deadline ((((class color) (min-colors 88) (background dark)) (:foreground "lime green"))))
- '(org-warning ((t (:foreground "tomato")))))
+      (setq custom-enabled-themes (quote (tango)))
+      (custom-set-faces
+       ;; custom-set-faces was added by Custom.
+       ;; If you edit it by hand, you could mess it up, so be careful.
+       ;; Your init file should contain only one such instance.
+       ;; If there is more than one, they won't work right.
+       '(font-latex-sectioning-0-face ((t (:weight bold :height 1.2))))
+       '(font-latex-sectioning-1-face ((t (:height 1.1))))
+       '(font-latex-sectioning-5-face ((((class color) (background dark)) (:foreground "yellow" :weight bold))))
+       '(font-latex-verbatim-face ((((class color) (background dark)) (:foreground "burlywood"))))
+       '(org-document-title ((((class color) (background dark)) (:foreground "dodger blue" :weight bold :height 1.2))))
+       '(org-scheduled ((((class color) (min-colors 88) (background dark)) (:foreground "dodger blue"))))
+       '(org-scheduled-previously ((((class color) (min-colors 88) (background dark)) (:foreground "white"))))
+       '(org-scheduled-today ((((class color) (min-colors 88) (background dark)) (:foreground "dodger blue"))))
+       '(org-upcoming-deadline ((((class color) (min-colors 88) (background dark)) (:foreground "lime green"))))
+       '(org-warning ((t (:foreground "tomato")))))
     #+end_src
 *** Packages
     #+begin_src emacs-lisp
