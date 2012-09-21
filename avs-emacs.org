@@ -350,6 +350,11 @@ cool.
      #+begin_src emacs-lisp
      (require 'org-html5presentation)
      #+end_src
+**** Präsentation mit Impress.js
+     #+begin_src emacs-lisp
+       (add-to-list 'load-path "~/code/org-impress-js.el/")
+       (require 'org-impress-js)
+     #+end_src
 *** Footnotes
     #+begin_src emacs-lisp
     (setq org-footnote-auto-adjust t)
@@ -550,6 +555,11 @@ cool.
               ))
      #+end_src
 
+    Keine Default-Styles beim Export
+    #+begin_src emacs-lisp
+      (setq org-export-html-style-include-default nil)
+      (setq org-export-html-style-include-scripts nil)
+    #+end_src
 *** RefTeX in Orgmode
     #+begin_src emacs-lisp
       (defun org-mode-reftex-setup ()
