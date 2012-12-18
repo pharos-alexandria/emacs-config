@@ -21,7 +21,7 @@
        (defun my-open-calendar ()
          (interactive)
          (cfw:open-calendar-buffer
-          :view 'month
+          :view 'week
           :contents-sources
           (list 
            (cfw:org-create-source "Seagreen4") ; color
@@ -108,8 +108,10 @@
     #+end_src
 *** Zotero-Anbindung
     #+begin_src emacs-lisp
-      (require 'zotexo)
-      (add-hook 'LaTeX-mode-hook 'zotexo-minor-mode)
+      (require 'zotelo)
+      (add-hook 'LaTeX-mode-hook 'zotelo-minor-mode)
+      (add-hook 'TeX-mode-hook 'zotelo-minor-mode)
+      (add-hook 'org-mode-hook 'zotelo-minor-mode)
     #+end_src
 *** Little editing shortcuts
 
@@ -204,18 +206,144 @@ cool.
         (shell-command (format "open -a Mail %s" (buffer-file-name))))
       (define-key global-map "\C-cs" 'mail-current-buffer)
     #+end_src
+** Emacs
+*** Allgemeine Einstellungen
+    #+begin_src emacs-lisp
+      (setq cua-mode t)
+      (setq inhibit-startup-screen t)
+      (setq server-mode t)
+      (tool-bar-mode 0)
+      (setq x-select-enable-clipboard t)
+      (setq tab-width 4)
+      (show-paren-mode t) ;highlight matching parentheses
+      (setq show-paren-delay 0)
+      ;; global visual line mode
+      (global-visual-line-mode 1) 
+      ;; Enable font-lock (syntax highlighting) in modes which support it
+      (global-font-lock-mode t)
+      (setq font-lock-maximum-decoration t)
+      (setenv "PATH" (concat "/usr/texbin:" (getenv "PATH")))
+      (add-hook 'text-mode-hook 'table-recognize)
+      
+      ;; Maximum colors
+      (setq font-lock-maximum-decoration t)
+      
+      ;; set current buffer's filename, and full path in titlebar
+      (setq frame-title-format '((buffer-file-name ": %f")))
+      
+      ;; Show path info in buffers with otherwise identical filenames
+      (require 'uniquify)
+      (setq uniquify-buffer-name-style 'post-forward)
+      
+      ;; Make very frequent autosaves
+      (setq auto-save-interval 5)
+      
+      ;; No beep or visual bell, please
+      (defun easymacs-no-beep ())
+      (setq ring-bell-function 'easymacs-no-beep)
+      
+      ;; Make searches case-insensitive
+      (set-default 'case-fold-search t)
+      
+      ;; Make all backups in a single directory
+      (when (boundp 'backup-directory-alist)
+        (let ((dir (expand-file-name "~/.emacs-backups")))
+          (or (file-directory-p dir) (make-directory dir))
+          (setq backup-directory-alist `(("." . ,dir)))))
+        
+      ;; Strip CTRL-M from Shell output
+      (add-hook 'comint-output-filter-functions 'shell-strip-ctrl-m nil t)
+      
+      ;; Use dialog boxes, if available
+      (setq use-dialog-box t)
+      
+      ;; Paste at cursor, rather than pointer
+      (setq mouse-yank-at-point t)
+      
+      ;; For <M-delete> to work properly
+      (setq kill-whole-line t)
+      
+      ;; Enable recently-opened files menu
+      (setq recentf-auto-cleanup 'never) ;; disable before we start recentf!
+      (recentf-mode 1)
+      (setq recentf-max-menu-items 30)
+      (setq recentf-max-saved-items 500)
+      (setq recentf-exclude '("[.]bm-repository$" "[.]tidyrc$"
+                              "^temp-tidy-" "[.]bmk$" "[.]abbrev_defs"
+                              "[.]elc$" "^/tmp/mutt" "/usr/dict/words"))
+      
+    #+end_src
+*** Mac-Einstellungen
+    #+begin_src emacs-lisp
+      (setq ns-right-alternate-modifier (quote none))
+      (setq ns-right-command-modifier (quote none))
+      (setq mac-option-modifier 'meta) ; sets the Option key as Super
+      (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
+    #+end_src
+*** Undo
+    #+begin_src emacs-lisp
+      (require 'undo-tree)
+      (global-undo-tree-mode 1)
+      (defalias 'redo 'undo-tree-redo)
+    #+end_src
+*** Diff
+    #+begin_src emacs-lisp
+      (setq vc-diff-switches '("-b" "-B" "-u"))
+    #+end_src
+*** Word-Count
+    #+begin_src emacs-lisp
+      (global-set-key [f10] 'count-words)
+    #+end_src
+*** Font
+    #+begin_src emacs-lisp
+      (set-face-attribute 'default nil
+                      :family "Monaco" :height 145 :weight 'normal)
+      ;; Zoom font
+      (define-key global-map (read-kbd-macro "C--") 'text-scale-decrease)
+      (define-key global-map (read-kbd-macro "C-+") 'text-scale-increase)
+    #+end_src
+*** Custom faces
+    #+begin_src emacs-lisp
+      (custom-set-faces
+       ;; custom-set-faces was added by Custom.
+       ;; If you edit it by hand, you could mess it up, so be careful.
+       ;; Your init file should contain only one such instance.
+       ;; If there is more than one, they won't work right.
+       '(font-latex-sectioning-0-face ((t (:weight bold :height 1.2))))
+       '(font-latex-sectioning-1-face ((t (:height 1.1))))
+       '(font-latex-sectioning-5-face ((((class color) (background dark)) (:foreground "yellow" :weight bold))))
+       '(font-latex-verbatim-face ((((class color) (background dark)) (:foreground "burlywood"))))
+       '(org-document-title ((((class color) (background dark)) (:foreground "dodger blue" :weight bold :height 1.2)))))
+    #+end_src
+*** Packages
+    #+begin_src emacs-lisp
+      (setq package-archives (quote (("gnu" . "http://elpa.gnu.org/packages/") ("melpa" . "http://melpa.milkbox.net/packages/") ("org" . "http://orgmode.org/elpa/"))))
+    #+end_src
+*** Version Control
+**** Bazaar
+     #+begin_src emacs-lisp
+     (setq vc-bzr-program "/usr/local/bin/bzr")
+     #+end_src
+*** Safe point between sessions
+    #+begin_src emacs-lisp
+      ;; Save point position between sessions
+      ;; from http://whattheemacsd.com/
+      (require 'saveplace)
+      (setq-default save-place t)
+      (setq save-place-file (expand-file-name ".places" user-emacs-directory))
+    #+end_src
 ** Orgmode
    #+begin_src emacs-lisp
+     (package-initialize)    ;; Initialize Package
      (require 'org)
-     (require 'org-install)
      (require 'org-inlinetask)
      (require 'org-protocol)
    #+end_src
 *** Agenda
     #+begin_src emacs-lisp
-      (setq org-agenda-add-entry-text-maxlines 20)
-      (setq org-agenda-files (quote ("~/Private/ORG/ws2011.org" "~/Documents/projekte/aw_III_4/todo.org" "~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org")))
-      (setq org-agenda-include-diary nil)
+      (setq org-agenda-window-setup 'current-window)
+      (setq org-indirect-buffer-display 'current-window)
+      (setq org-agenda-files (quote ("~/Documents/projekte/aw_III_4/todo.org" "~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org")))
       (setq org-agenda-skip-deadline-if-done t)
       (setq org-agenda-skip-scheduled-if-deadline-is-shown (quote not-today))
       (setq org-agenda-skip-scheduled-if-done t)
@@ -223,7 +351,7 @@ cool.
       (setq org-agenda-todo-ignore-deadlines (quote near))
       (setq org-agenda-todo-ignore-scheduled (quote future))
       ;; Agenda soll in ganzem Frame starten
-      (setq org-agenda-window-frame-fractions '(1.0 . 1.0))
+      ;;(setq org-agenda-window-frame-fractions '(1.0 . 1.0))
       (setq org-agenda-custom-commands
             '(("d" "Deadlines" agenda ""
                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled))
@@ -245,8 +373,10 @@ cool.
                 (tags-todo "ONLINE")
                 (tags-todo "HIWI")
                 (tags-todo "HCB")))
-              ("n" "Notizen"
-               ((tags-todo "NOTIZ")))
+              ("l" "Lesezeichen"
+               ((tags-todo "BOOKMARK")))
+              ("p" "Projekte"
+               ((tags-todo "PROJEKT")))
               ("I" "Import diary from iCal" agenda ""
                ((org-agenda-mode-hook
                  (lambda ()
@@ -265,7 +395,8 @@ cool.
       
       ;; (setq org-agenda-format-date 
       ;;  "%d.%m.%Y ---------------------------------------------------------------------")
-      (setq org-agenda-date-weekend (quote (:foreground "Yellow" :weight bold)))
+      (setq org-agenda-start-on-weekday nil)
+      (setq org-deadline-warning-days 10)
     #+end_src
 *** Allgemeine Einstellungen
     #+begin_src emacs-lisp
@@ -283,7 +414,17 @@ cool.
       (setq org-babel-load-languages (quote ((emacs-lisp) (ditaa . t) (latex . t))))
       (setq org-confirm-babel-evaluate nil)
       (setq org-crypt-key "C62E93D8")
+      (setq org-use-speed-commands t)
     #+end_src
+**** Ido-style Completion
+     I also like using =ido=-style completion.
+
+     #+begin_src emacs-lisp
+       (setq org-completion-use-ido t)
+       (setq ido-everywhere t)
+       (setq ido-max-directory-size 100000)
+       (ido-mode (quote both))
+     #+end_src
 *** Anbindung von Orgmode an Mac-Programme
     #+begin_src emacs-lisp
       (require 'org-mac-iCal)
@@ -297,7 +438,7 @@ cool.
     #+end_src
 *** Ditaa
     #+begin_src emacs-lisp
-      (setq org-ditaa-jar-path "~/.emacs.d/contrib/scripts/ditaa.jar")
+      ;;(setq org-ditaa-jar-path "~/.emacs.d/contrib/scripts/ditaa.jar")
       (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
     #+end_src
 *** Drawers und Logging
@@ -306,6 +447,10 @@ cool.
       (setq org-clock-into-drawer "CLOCK")
     #+end_src
 *** Export
+**** Neuer Exporter
+     #+begin_src emacs-lisp
+       (require 'org-export)
+     #+end_src
 **** Allgemeine Einstellungen
      #+begin_src emacs-lisp
      (setq org-export-with-drawers nil)
@@ -355,9 +500,14 @@ cool.
        (add-to-list 'load-path "~/code/org-impress-js.el/")
        (require 'org-impress-js)
      #+end_src
+**** Markdown
+     #+begin_src emacs-lisp
+       (require 'org-md)
+     #+end_src
 *** Footnotes
     #+begin_src emacs-lisp
-    (setq org-footnote-auto-adjust t)
+      (setq org-footnote-auto-adjust t)
+      (setq org-footnote-define-inline t)
     #+end_src
 *** GTD mit Orgmode
     #+begin_src emacs-lisp
@@ -379,9 +529,8 @@ cool.
      (global-set-key (kbd "C-c l") 'org-store-link)  ;; Links
      (global-set-key "\C-cr" 'org-capture)
      (global-set-key (kbd "C-c b") 'org-iswitchb)    ;; switch
-     (global-set-key (kbd "<f5>")  'my-open-calendar) ;; Calfw-Kalender
+     (global-set-key (kbd "C-c h")  'my-open-calendar) ;; Calfw-Kalender
      (global-set-key (kbd "C-c t")  'org-todo-list)   ;; todo-list (NextActions)
-     (global-set-key (kbd "C-c h") 'omlg-grab-link) ;; grab-link from mac apps
     #+end_src
 
     =append-next-kill= is more useful to me than =org-table-copy-region=.
@@ -477,7 +626,7 @@ cool.
       (require 'org-mobile)
       (setq org-mobile-directory "/Volumes/webdav.smartdrive.web.de/orgmode")
       (setq org-mobile-inbox-for-pull "/Volumes/webdav.smartdrive.web.de/orgmode/inbox.org")
-      (setq org-mobile-files (quote ("~/Private/ORG/ss2012.org" "~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org" "~/Documents/projekte/aw_III_4/todo.org")))
+      (setq org-mobile-files (quote ("~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org" "~/Documents/projekte/aw_III_4/todo.org")))
     #+end_src
 
 *** Modules
@@ -502,7 +651,7 @@ cool.
 *** O-Blog
     Initialisierung für O-Blog
     #+begin_src emacs-lisp
-      (add-to-list 'load-path "~/.emacs.d/o-blog")
+      ;;(add-to-list 'load-path "~/.emacs.d/o-blog")
       (require 'o-blog)
     #+end_src
 *** Orgmode für .org-Dateien
@@ -515,7 +664,7 @@ cool.
     #+end_src
 *** Orgmode und LaTeX
     #+begin_src emacs-lisp
-      (setq org-latex-to-pdf-process (list "latexmk -output-directory %o -xelatex %f"))
+      (setq org-latex-to-pdf-process (list "latexmk -xelatex %f"))
     #+end_src
 *** Publishing
     Timestamps and section numbers make my published files look more
@@ -612,15 +761,12 @@ cool.
      latest entries on top.
     
     #+begin_src emacs-lisp
-      (setq org-refile-use-outline-path (quote file))
-      ;; Targets include this file and any file contributing to the agenda - up to 5 levels deep
-      (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 5) (nil :maxlevel . 5))))
-      ;; Targets start with the file name - allows creating level 1 tasks
-      (setq org-refile-use-outline-path (quote file))
-      ;; Targets complete in steps so we start with filename, TAB shows the next level of targets etc 
+      (setq org-refile-use-outline-path t)
       (setq org-outline-path-complete-in-steps t)
-      (setq org-refile-targets (quote (("gtd.org" :maxlevel . 3) 
-                                       ("notizen.org" :level . 2))))
+      (setq org-refile-targets (quote (("~/Private/ORG/gtd.org" :maxlevel . 3) 
+                                       ("~/Private/ORG/notizen.org" :maxlevel . 3))))
+      ; Allow refile to create parent tasks with confirmation
+      (setq org-refile-allow-creating-parent-nodes (quote confirm))
     #+end_src
     
 *** Viewing, navigating, and editing the Org tree
@@ -635,14 +781,24 @@ cool.
       (define-key org-mode-map (kbd "C-c k") 'org-cut-subtree)
       (setq org-yank-adjusted-subtrees t)  
     #+end_src
-*** Weitere Orgmode-Einstellungen
-**** Ido-style Completion
-     I also like using =ido=-style completion.
 
-     #+begin_src emacs-lisp
-       (setq org-completion-use-ido t)
-     #+end_src
+*** Org-Sync (Bugtracking)
+#+begin_src emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/org-sync")
+  (mapc 'load
+        '("org-element" "os" "os-bb" "os-github"))
+#+end_src
 
+*** Speedbar
+   #+begin_src emacs-lisp
+     (require 'speedbar)
+     (require 'sr-speedbar)
+     (speedbar-add-supported-extension ".org")
+     (add-hook 'org-mode-hook
+               (lambda () (imenu-add-to-menubar "Imenu")))
+     (add-hook 'org-mode-hook 'imenu-add-menubar-index)
+     (global-set-key (kbd "C-l") 'sr-speedbar-toggle)  
+ #+end_src
 ** Markdown
 *** Markdown für .md-Dateien
     #+begin_src emacs-lisp
@@ -670,7 +826,6 @@ cool.
       (setq reftex-external-file-finders
         '(("tex" . "kpsewhich -format=.tex %f")
           ("bib" . "kpsewhich -format=.bib %f")))
-      (setq reftex-default-bibliography (quote ("~/Documents/Bibliographie.bib")))
     #+end_src
 *** Reftex-Index
     #+begin_src emacs-lisp
@@ -734,132 +889,8 @@ cool.
                                      ("Clean All" "(TeX-clean t)" TeX-run-function nil t :help "Delete generated intermediate and output files")
                                      ("Other" "" TeX-run-command t t :help "Run an arbitrary command"))))
     #+end_src
-** Emacs
-*** Allgemeine Einstellungen
-    #+begin_src emacs-lisp
-      (setq cua-mode t)
-      (setq inhibit-startup-screen t)
-      (setq server-mode t)
-      (tool-bar-mode 0)
-      (setq x-select-enable-clipboard t)
-      (setq tab-width 4)
-      (show-paren-mode t) ;highlight matching parentheses
-      (setq show-paren-delay 0)
-      ;; global visual line mode
-      (global-visual-line-mode 1) 
-      ;; Enable font-lock (syntax highlighting) in modes which support it
-      (global-font-lock-mode t)
-      (setq font-lock-maximum-decoration t)
-      (setenv "PATH" (concat "/usr/texbin:" (getenv "PATH")))
-      (add-hook 'text-mode-hook 'table-recognize)
-      
-      ;; Maximum colors
-      (setq font-lock-maximum-decoration t)
-      
-      ;; set current buffer's filename, and full path in titlebar
-      (setq frame-title-format '((buffer-file-name ": %f")))
-      
-      ;; Show path info in buffers with otherwise identical filenames
-      (require 'uniquify)
-      (setq uniquify-buffer-name-style 'post-forward)
-      
-      ;; Make very frequent autosaves
-      (setq auto-save-interval 5)
-      
-      ;; No beep or visual bell, please
-      (defun easymacs-no-beep ())
-      (setq ring-bell-function 'easymacs-no-beep)
-      
-      ;; Make searches case-insensitive
-      (set-default 'case-fold-search t)
-      
-      ;; Make all backups in a single directory
-      (when (boundp 'backup-directory-alist)
-        (let ((dir (expand-file-name "~/.emacs-backups")))
-          (or (file-directory-p dir) (make-directory dir))
-          (setq backup-directory-alist `(("." . ,dir)))))
-        
-      ;; Strip CTRL-M from Shell output
-      (add-hook 'comint-output-filter-functions 'shell-strip-ctrl-m nil t)
-      
-      ;; Use dialog boxes, if available
-      (setq use-dialog-box t)
-      
-      ;; Paste at cursor, rather than pointer
-      (setq mouse-yank-at-point t)
-      
-      ;; For <M-delete> to work properly
-      (setq kill-whole-line t)
-      
-      ;; Enable recently-opened files menu
-      (setq recentf-auto-cleanup 'never) ;; disable before we start recentf!
-      (recentf-mode 1)
-      (setq recentf-max-menu-items 30)
-      (setq recentf-max-saved-items 500)
-      (setq recentf-exclude '("[.]bm-repository$" "[.]tidyrc$"
-                              "^temp-tidy-" "[.]bmk$" "[.]abbrev_defs"
-                              "[.]elc$" "^/tmp/mutt" "/usr/dict/words"))
-      
-    #+end_src
-*** Mac-Einstellungen
-    #+begin_src emacs-lisp
-      (setq ns-alternate-modifier nil)
-      (setq ns-right-alternate-modifier (quote none))
-      (setq ns-right-command-modifier (quote meta))
-    #+end_src
-*** Undo
-    #+begin_src emacs-lisp
-      (require 'undo-tree)
-      (global-undo-tree-mode 1)
-      (defalias 'redo 'undo-tree-redo)
-    #+end_src
-*** Diff
-    #+begin_src emacs-lisp
-      (setq vc-diff-switches '("-b" "-B" "-u"))
-    #+end_src
-*** Word-Count
-    #+begin_src emacs-lisp
-      ;; Define a count of the number of words in a highlighted region and bind to F6
-      ;; Handy for forms with word limits and titles with character limits
-      (defun word-count (start end)
-        (interactive "r")
-        (let ((words 0) (lines 0) (chars 0))
-          (save-excursion
-            (goto-char start)
-            (while (< (point) end) (forward-word 1) (setq words (1+ words))))
-          (setq lines (count-lines start end) chars (- end start))
-          (message "Region has  %d lines;   %d words;   %d characters."
-                   lines words chars)))
-      (global-set-key [f10] 'word-count)
-      ;;
-      (defun word-count nil "Count words in buffer" (interactive)
-        (shell-command-on-region (point-min) (point-max) "wc -w"))
-    #+end_src
-*** Custom faces
-    #+begin_src emacs-lisp
-      (setq custom-enabled-themes (quote (tango)))
-      (custom-set-faces
-       ;; custom-set-faces was added by Custom.
-       ;; If you edit it by hand, you could mess it up, so be careful.
-       ;; Your init file should contain only one such instance.
-       ;; If there is more than one, they won't work right.
-       '(font-latex-sectioning-0-face ((t (:weight bold :height 1.2))))
-       '(font-latex-sectioning-1-face ((t (:height 1.1))))
-       '(font-latex-sectioning-5-face ((((class color) (background dark)) (:foreground "yellow" :weight bold))))
-       '(font-latex-verbatim-face ((((class color) (background dark)) (:foreground "burlywood"))))
-       '(org-document-title ((((class color) (background dark)) (:foreground "dodger blue" :weight bold :height 1.2))))
-       '(org-scheduled ((((class color) (min-colors 88) (background dark)) (:foreground "dodger blue"))))
-       '(org-scheduled-previously ((((class color) (min-colors 88) (background dark)) (:foreground "white"))))
-       '(org-scheduled-today ((((class color) (min-colors 88) (background dark)) (:foreground "dodger blue"))))
-       '(org-upcoming-deadline ((((class color) (min-colors 88) (background dark)) (:foreground "lime green"))))
-       '(org-warning ((t (:foreground "tomato")))))
-    #+end_src
-*** Packages
-    #+begin_src emacs-lisp
-    (setq package-archives (quote (("gnu" . "http://elpa.gnu.org/packages/") ("melpa" . "http://melpa.milkbox.net/packages/"))))
-    #+end_src
-*** Version Control
-**** Bazaar
-     #+begin_src emacs-lisp
-     (setq vc-bzr-program "/usr/local/bin/bzr")
-     #+end_src
+** Twittering
+   #+begin_src emacs-lisp
+     (setq twittering-use-master-password t)
+     (setq twittering-icon-mode t)
+   #+end_src
