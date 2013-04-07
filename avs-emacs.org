@@ -121,11 +121,6 @@
        (setq sentence-end-double-space nil) 
      #+end_src
 
-**** Enter führt zu neuer Zeile und Einrückung
-     #+begin_src emacs-lisp
-       (global-set-key (kbd "RET") 'newline-and-indent)
-     #+end_src
-
 **** Searching based on the current word
      This lets me search up and down.
      
@@ -192,6 +187,11 @@ cool.
        (setq ido-enable-flex-matching t) ;; enable fuzzy matching
        
      #+end_src
+**** Typographische Anführungszeichen
+     #+begin_src emacs-lisp
+       (add-hook 'text-mode-hook 'typo-mode)
+       (setq typo-language "German (Guillemets)")
+     #+end_src
 *** Change "yes or no" to "y or n"
 
     #+begin_src emacs-lisp
@@ -222,14 +222,16 @@ cool.
       ;; Enable font-lock (syntax highlighting) in modes which support it
       (global-font-lock-mode t)
       (setq font-lock-maximum-decoration t)
-      (setenv "PATH" (concat "/usr/texbin:" (getenv "PATH")))
       (add-hook 'text-mode-hook 'table-recognize)
-      
+      ;; Smartparens
+      (package-initialize)
+      (smartparens-global-mode t)
+      ;;(global-hl-line-mode 1)      
       ;; Maximum colors
       (setq font-lock-maximum-decoration t)
       
       ;; set current buffer's filename, and full path in titlebar
-      (setq frame-title-format '((buffer-file-name ": %f")))
+      (setq frame-title-format '((buffer-file-name "%f")))
       
       ;; Show path info in buffers with otherwise identical filenames
       (require 'uniquify)
@@ -250,7 +252,7 @@ cool.
         (let ((dir (expand-file-name "~/.emacs-backups")))
           (or (file-directory-p dir) (make-directory dir))
           (setq backup-directory-alist `(("." . ,dir)))))
-        
+      
       ;; Strip CTRL-M from Shell output
       (add-hook 'comint-output-filter-functions 'shell-strip-ctrl-m nil t)
       
@@ -272,6 +274,16 @@ cool.
                               "^temp-tidy-" "[.]bmk$" "[.]abbrev_defs"
                               "[.]elc$" "^/tmp/mutt" "/usr/dict/words"))
       
+      
+      ;; http://emacsredux.com/blog/2013/03/30/kill-other-buffers/
+      (defun kill-other-buffers ()
+        "Kill all buffers but the current one.
+      Don't mess with special buffers."
+        (interactive)
+        (dolist (buffer (buffer-list))
+          (unless (or (eql buffer (current-buffer)) (not (buffer-file-name buffer)))
+            (kill-buffer buffer))))
+      ;;(global-set-key (kbd "C-c k") 'kill-other-buffers)
     #+end_src
 *** Mac-Einstellungen
     #+begin_src emacs-lisp
@@ -279,6 +291,9 @@ cool.
       (setq ns-right-command-modifier (quote none))
       (setq mac-option-modifier 'meta) ; sets the Option key as Super
       (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
+      (require 'exec-path-from-shell)
+      (when (memq window-system '(mac ns))
+        (exec-path-from-shell-initialize))
     #+end_src
 *** Undo
     #+begin_src emacs-lisp
@@ -292,15 +307,15 @@ cool.
     #+end_src
 *** Word-Count
     #+begin_src emacs-lisp
-      (global-set-key [f10] 'count-words)
+      (global-set-key [f8] 'count-words)
     #+end_src
 *** Font
     #+begin_src emacs-lisp
       (set-face-attribute 'default nil
-                      :family "Monaco" :height 145 :weight 'normal)
+                      :family "DejaVu Sans Mono" :height 145 :weight 'normal)
       ;; Zoom font
-      (define-key global-map (read-kbd-macro "C--") 'text-scale-decrease)
-      (define-key global-map (read-kbd-macro "C-+") 'text-scale-increase)
+      ;;(define-key global-map (read-kbd-macro "C--") 'text-scale-decrease)
+      ;;(define-key global-map (read-kbd-macro "C-+") 'text-scale-increase)
     #+end_src
 *** Custom faces
     #+begin_src emacs-lisp
@@ -309,10 +324,12 @@ cool.
        ;; If you edit it by hand, you could mess it up, so be careful.
        ;; Your init file should contain only one such instance.
        ;; If there is more than one, they won't work right.
-       '(font-latex-sectioning-0-face ((t (:weight bold :height 1.2))))
-       '(font-latex-sectioning-1-face ((t (:height 1.1))))
+       '(font-latex-sectioning-0-face ((t (:weight bold :height 1.5))))
+       '(font-latex-sectioning-1-face ((t (:weight bold :height 1.4))))
+       '(font-latex-sectioning-2-face ((t (:weight bold :height 1.3))))
+       '(font-latex-sectioning-3-face ((t (:weight bold :height 1.2))))
+       '(font-latex-sectioning-4-face ((t (:weight bold :height 1.1))))
        '(font-latex-sectioning-5-face ((((class color) (background dark)) (:foreground "yellow" :weight bold))))
-       '(font-latex-verbatim-face ((((class color) (background dark)) (:foreground "burlywood"))))
        '(org-document-title ((((class color) (background dark)) (:foreground "dodger blue" :weight bold :height 1.2)))))
     #+end_src
 *** Packages
@@ -332,6 +349,20 @@ cool.
       (setq-default save-place t)
       (setq save-place-file (expand-file-name ".places" user-emacs-directory))
     #+end_src
+*** DuckDuckGo-Suche
+    #+begin_src emacs-lisp
+      ;; Idee von http://emacsredux.com/blog/2013/03/28/google/
+      (defun duckduckgo ()
+        "Duckduckgo the selected region if any, display a query prompt otherwise."
+        (interactive)
+        (browse-url
+         (concat
+          "https://duckduckgo.com/?kl=de-de&kj=b2&&q="
+          (url-hexify-string (if mark-active
+               (buffer-substring (region-beginning) (region-end))
+             (read-string "Duckduckgo: "))))))
+      (global-set-key (kbd "C-c d") 'duckduckgo)
+    #+end_src
 ** Orgmode
    #+begin_src emacs-lisp
      (package-initialize)    ;; Initialize Package
@@ -343,7 +374,7 @@ cool.
     #+begin_src emacs-lisp
       (setq org-agenda-window-setup 'current-window)
       (setq org-indirect-buffer-display 'current-window)
-      (setq org-agenda-files (quote ("~/Documents/projekte/aw_III_4/todo.org" "~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org")))
+      (setq org-agenda-files (quote ("~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org")))
       (setq org-agenda-skip-deadline-if-done t)
       (setq org-agenda-skip-scheduled-if-deadline-is-shown (quote not-today))
       (setq org-agenda-skip-scheduled-if-done t)
@@ -432,7 +463,7 @@ cool.
       (global-set-key "\C-cm" 'org-mac-message-insert-selected)
       (global-set-key "\C-xm" 'omgl-grab-link)
       (setq org-mac-mail-account "Privat")
-      (setq org-mac-grab-Firefox-app-p nil)
+      (setq org-mac-grab-Chrome-app-p nil)
       (setq org-mac-grab-Safari-app-p nil)
       (setq org-mac-grab-Together-app-p nil)
     #+end_src
@@ -447,13 +478,10 @@ cool.
       (setq org-clock-into-drawer "CLOCK")
     #+end_src
 *** Export
-**** Neuer Exporter
-     #+begin_src emacs-lisp
-       (require 'org-export)
-     #+end_src
 **** Allgemeine Einstellungen
      #+begin_src emacs-lisp
-     (setq org-export-with-drawers nil)
+       ;;(require 'ox-export)
+       (setq org-export-with-drawers nil)
      #+end_src
 **** LaTeX-Beamer
      #+begin_src emacs-lisp
@@ -469,7 +497,8 @@ cool.
                                               ("koma-report" "\\documentclass{scrreprt}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
                                               ("beamer" "\\documentclass{beamer}\\usepackage{fontspec,xkeyval}\\usepackage[babelshorthands]{polyglossia}\\setdefaultlanguage{german}\\setotherlanguage[variant=poly]{greek}\\setotherlanguages{french,english}\\setromanfont[Mapping=tex-text,Numbers=Lowercase,Ligatures=Common]{Adobe
        Garamond Pro}\\setsansfont[Mapping=tex-text,Numbers=Lowercase,Scale=MatchUppercase]{Iwona}\\newfontfamily\\greekfont[Mapping=tex-text,Script=Greek,Ligatures=Common,Scale=MatchLowercase]{GFS
-       Neohellenic}" org-beamer-sectioning))))
+       Neohellenic}" org-beamer-sectioning)
+                                              ("beamer-simple" "\\documentclass{beamer}" org-beamer-sectioning))))
        (setq org-export-latex-date-format "%d. %B %Y")
        (setq org-export-latex-default-packages-alist (quote (("" "graphicx" t) ("" "longtable" t) ("" "hyperref" t) "\\tolerance=1000")))
        (setq org-export-latex-emphasis-alist (quote (("*" "\\textbf{%s}" nil) ("/" "\\emph{%s}" nil) ("_" "\\underline{%s}" nil) ("+" "\\st{%s}" nil) ("=" "\\verb" t) ("~" "\\verb" t) ("@" "\\alert{%s}" nil))))
@@ -626,7 +655,7 @@ cool.
       (require 'org-mobile)
       (setq org-mobile-directory "/Volumes/webdav.smartdrive.web.de/orgmode")
       (setq org-mobile-inbox-for-pull "/Volumes/webdav.smartdrive.web.de/orgmode/inbox.org")
-      (setq org-mobile-files (quote ("~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org" "~/Documents/projekte/aw_III_4/todo.org")))
+      (setq org-mobile-files (quote ("~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org")))
     #+end_src
 
 *** Modules
@@ -647,12 +676,6 @@ cool.
                           org-panel
                           org-screen
                           org-toc))
-    #+end_src
-*** O-Blog
-    Initialisierung für O-Blog
-    #+begin_src emacs-lisp
-      ;;(add-to-list 'load-path "~/.emacs.d/o-blog")
-      (require 'o-blog)
     #+end_src
 *** Orgmode für .org-Dateien
     #+begin_src emacs-lisp
@@ -813,13 +836,16 @@ cool.
 ** LaTeX
 *** Syntax-Highlighting
     #+begin_src emacs-lisp
-      (setq LaTeX-paragraph-commands (quote ("pstart" "pend" "kap")))
-      (setq font-latex-match-function-keywords (quote (("beginnumbering" "") ("endnumbering" "") ("hist" "{"))))
-      (setq font-latex-match-reference-keywords (quote (("edindex" "[{") ("esindex" "{") ("enindex" "{") ("nindex" "{") ("pindex" "{") ("qindex" "{") ("aindex" "{") ("cindex" "{") ("bindex" "{") ("grindex" "{") ("sindex" "{") ("specialindex" "{{{") ("editioncite" "*[{") ("footcite" "*[{"))))
+      (setq LaTeX-paragraph-commands (quote ("pstart" "pend" "kap" "textcomm")))
+      (setq font-latex-match-function-keywords (quote (("beginnumbering" "") ("endnumbering" "") ("hist" "{")  ("transfn" "{"))))
+      (setq font-latex-match-reference-keywords (quote (("edindex" "[{") ("esindex" "{") ("enindex" "{") ("nindex" "{") ("pindex" "{") ("qindex" "{") ("aindex" "{") ("cindex" "{") ("bindex" "{") ("grindex" "{") ("sindex" "{") ("specialindex" "{{{"))))
       (setq font-latex-match-textual-keywords (quote (("var" "{{") ("varlat" "{{") ("varabb" "{{") ("varom" "{{") ("varomabb" "{{{") ("varadd" "{{") ("vartr" "{{") ("bibel" "{{") ("bibelcf" "{{") ("bibelcfl" "{{{") ("bezeugung" "{") ("bezeugungpart" "{{"))))
+      (setq font-latex-user-keyword-classes (quote (("Todos" (("todo" "{{") ("marke" "{")) (:weight bold :foreground "red" :background "yellow") command) ("Textkrit" (("komm" "{{") ("komml" "{{{") ("textcr" "{{") ("zitat" "{{{{") ("stelle" "{{{")) (:foreground "gray40" :slant italic) command) ("Transl" (("transl" "{") ("fundort" "{{{{")) (:foreground "gray60") command))))
     #+end_src
 *** RefTeX
     #+begin_src emacs-lisp
+      (require 'reftex)
+      (add-hook 'LaTeX-mode-hook 'turn-on-reftex)   ; with AUCTeX LaTeX mode
       (setq reftex-plug-into-AUCTeX t) 
       (setq reftex-enable-partial-scans t)
       (setq reftex-use-external-file-finders t)
@@ -848,16 +874,29 @@ cool.
               (?t . "\\textcite[]{%l}")
               (?p . "\\parencite[]{%l}")
               (?o . "\\citepr[]{%l}")
-              (?n . "\\nocite{%l}")))
+              (?n . "\\nocite{%l}")
+              (?x . "[@%l]")))
       (setq reftex-cite-prompt-optional-args t)
+      (setq font-latex-match-reference-keywords
+            '(("cite" "[{")
+              ("cites" "[{}]")
+              ("footcite" "[{")
+              ("editioncite" "[{")
+              ("footcites" "[{")
+              ("parencite" "[{")
+              ("textcite" "[{")
+              ("fullcite" "[{") 
+              ("citetitle" "[{") 
+              ("citetitles" "[{") 
+              ("headlessfullcite" "[{")))
     #+end_src
 *** Allgemein
     #+begin_src emacs-lisp
-      (setq TeX-open-quote "»")
-      (setq TeX-close-quote "«")
+      ;;(setq TeX-open-quote "»")
+      ;;(setq TeX-close-quote "«")
       (setq font-latex-quotes (quote german))
-      (setq LaTeX-csquotes-close-quote "}")
-      (setq LaTeX-csquotes-open-quote "\\enquote{")
+      ;;(setq LaTeX-csquotes-close-quote "}")
+      ;;(setq LaTeX-csquotes-open-quote "\\enquote{")
       (setq TeX-PDF-mode t)
       (setq TeX-default-macro "footnote")
       (add-hook 'LaTeX-mode-hook 'turn-on-auto-fill)
@@ -873,6 +912,7 @@ cool.
       (setq TeX-command-list (quote (("TeX" "%(PDF)%(tex) %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil (plain-tex-mode texinfo-mode ams-tex-mode) :help "Run plain TeX")
                                      ("LaTeX" "%`%l%(mode)%' %t" TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX")
                                      ("XeLaTeX" "xelatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run XeLaTeX")
+                                     ("LuaLaTeX" "lualatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run LuaLaTeX")
                                      ("Latexmk (PDF)" "latexmk -pdflatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run PDFLaTeX with latexmk")
                                      ("Latexmk (XeLaTeX)" "latexmk -xelatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run XeLaTeX with latexmk")
                                      ("BibTeX" "biber %s" TeX-run-BibTeX nil t :help "Run BibTeX")
@@ -889,8 +929,3 @@ cool.
                                      ("Clean All" "(TeX-clean t)" TeX-run-function nil t :help "Delete generated intermediate and output files")
                                      ("Other" "" TeX-run-command t t :help "Run an arbitrary command"))))
     #+end_src
-** Twittering
-   #+begin_src emacs-lisp
-     (setq twittering-use-master-password t)
-     (setq twittering-icon-mode t)
-   #+end_src
