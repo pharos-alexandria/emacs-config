@@ -1,13 +1,12 @@
 #+TITLE: Meine Emacs-Konfiguration
 * Meine Emacs-Konfiguration
   Inspired by (and partially copied from) [[http://dl.dropbox.com/u/3968124/sacha-emacs.html][Sacha Chua's emacs onfiguration]] on [2012-06-09 Sa].
-** Persönliche Informationen
-   #+begin_src emacs-lisp
-     (setq user-full-name "Annette von Stockhausen"
-         user-mail-address "annette@vonstockhausen.eu")
-     (setq org-from-is-user-regexp "\\<Annette von Stockhausen\\>")
-   #+end_src
 ** Allgemeine Einstellungen
+*** Fullscreen in OSX
+    #+begin_src emacs-lisp
+      (setq ns-use-native-fullscreen nil)
+      (global-set-key [f9] 'toggle-frame-fullscreen)
+    #+end_src
 *** Zeit-Einstellungen
     #+begin_src emacs-lisp
     (setq system-time-locale "de_DE")
@@ -23,9 +22,10 @@
          (cfw:open-calendar-buffer
           :view 'week
           :contents-sources
-          (list 
-           (cfw:org-create-source "Seagreen4") ; color
-           (cfw:ical-create-source "ical" "https://www.google.com/calendar/ical/.../basic.ics" "#2952a3"))))
+          (list
+           (cfw:org-create-source "Blue")  ; orgmode source
+           (cfw:ical-create-source "gcal" "https://www.google.com/calendar/ical/…/basic.ics" "IndianRed") ; google calendar ICS
+          )))
      #+end_src
 **** Kalender mit deutschen Feiertagen, kopiert von http://thenybble.de/projects/german-emacs-calendar.html
     #+begin_src emacs-lisp
@@ -115,6 +115,13 @@
     #+end_src
 *** Little editing shortcuts
 
+**** Auto-complete
+     #+BEGIN_SRC emacs-lisp
+       (require 'auto-complete)
+       (global-auto-complete-mode t)
+       (add-to-list 'ac-modes 'org-mode)
+       ;;(require 'auto-complete-auctex)
+     #+END_SRC
 **** Navigation
      Sätze enden mit einfachem Leerzeichen
      #+begin_src emacs-lisp
@@ -160,38 +167,34 @@ cool.
 (setq tramp-default-method "ssh")
 #+end_src
 
-**** Ido-mode: Show recent files
-     Ido-mode is awesome. Let's make it awesomer. I usually want to go to
-     recently-opened files first.
-
+**** Helm
      #+begin_src emacs-lisp
-       (require 'ido)
-       (ido-mode 1)
-       (setq ido-default-buffer-method 'selected-window)
-       (add-hook 'ido-make-file-list-hook 'ido-sort-mtime)
-       (add-hook 'ido-make-dir-list-hook 'ido-sort-mtime)
-       (defun ido-sort-mtime ()
-         (setq ido-temp-list
-               (sort ido-temp-list 
-                     (lambda (a b)
-                       (let ((ta (nth 5 (file-attributes (concat ido-current-directory a))))
-                             (tb (nth 5 (file-attributes (concat ido-current-directory b)))))
-                         (if (= (nth 0 ta) (nth 0 tb))
-                             (> (nth 1 ta) (nth 1 tb))
-                           (> (nth 0 ta) (nth 0 tb)))))))
-         (ido-to-end  ;; move . files to end (again)
-          (delq nil (mapcar
-                     (lambda (x) (if (string-equal (substring x 0 1) ".") x))
-                     ido-temp-list))))
-       ;; Zusätzlich
-       (setq ido-enable-flex-matching t) ;; enable fuzzy matching
-       
+       (global-set-key (kbd "C-c h") 'helm-mini)
+       ;;(global-set-key (kbd "C-x C-f") 'helm-find-files)
+       (global-set-key (kbd "C-;") 'helm-execute-persistent-action)
+       (global-set-key (kbd "C-c C-r") 'helm-recentf)
+       ;; Helm-Swoop
+       (global-set-key (kbd "M-i") 'helm-swoop)
+       (global-set-key (kbd "M-I") 'helm-swoop-back-to-last-point)
+       (global-set-key (kbd "C-c M-i") 'helm-multi-swoop)
+       (global-set-key (kbd "C-x M-i") 'helm-multi-swoop-all)
      #+end_src
+**** Smex
+     #+BEGIN_SRC emacs-lisp
+       (global-set-key (kbd "M-x") 'smex)
+       (global-set-key (kbd "M-X") 'smex-major-mode-commands)
+       ;; This is your old M-x.
+       (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
+     #+END_SRC
 **** Typographische Anführungszeichen
      #+begin_src emacs-lisp
        (add-hook 'text-mode-hook 'typo-mode)
        (setq typo-language "German (Guillemets)")
      #+end_src
+**** Occur
+     #+BEGIN_SRC emacs-lisp
+       (global-set-key (kbd "C-c o") 'occur)
+     #+END_SRC
 *** Change "yes or no" to "y or n"
 
     #+begin_src emacs-lisp
@@ -287,6 +290,9 @@ cool.
     #+end_src
 *** Mac-Einstellungen
     #+begin_src emacs-lisp
+      (setq ns-pop-up-frames nil)
+      (defun ns-raise-emacs ()
+        (ns-do-applescript "tell application \"Emacs\" to activate"))
       (setq ns-right-alternate-modifier (quote none))
       (setq ns-right-command-modifier (quote none))
       (setq mac-option-modifier 'meta) ; sets the Option key as Super
@@ -295,6 +301,10 @@ cool.
       (when (memq window-system '(mac ns))
         (exec-path-from-shell-initialize))
     #+end_src
+*** Dired
+    #+BEGIN_SRC emacs-lisp
+    (require 'dired-x)
+    #+END_SRC
 *** Undo
     #+begin_src emacs-lisp
       (require 'undo-tree)
@@ -309,16 +319,24 @@ cool.
     #+begin_src emacs-lisp
       (global-set-key [f8] 'count-words)
     #+end_src
+*** Spellcheck
+    #+begin_src emacs-lisp
+      (setq ispell-program-name "aspell")
+      (setq ispell-dictionary "de")
+      (setq ispell-list-command "list")
+      (setq ispell-extra-args '("--sug-mode=fast"))
+    #+end_src
 *** Font
     #+begin_src emacs-lisp
       (set-face-attribute 'default nil
                       :family "DejaVu Sans Mono" :height 145 :weight 'normal)
       ;; Zoom font
-      ;;(define-key global-map (read-kbd-macro "C--") 'text-scale-decrease)
-      ;;(define-key global-map (read-kbd-macro "C-+") 'text-scale-increase)
+      (define-key global-map (read-kbd-macro "C--") 'text-scale-decrease)
+      (define-key global-map (read-kbd-macro "C-+") 'text-scale-increase)
     #+end_src
 *** Custom faces
     #+begin_src emacs-lisp
+      (global-rainbow-delimiters-mode)
       (custom-set-faces
        ;; custom-set-faces was added by Custom.
        ;; If you edit it by hand, you could mess it up, so be careful.
@@ -363,10 +381,34 @@ cool.
              (read-string "Duckduckgo: "))))))
       (global-set-key (kbd "C-c d") 'duckduckgo)
     #+end_src
+*** Yasnippet
+    #+begin_src emacs-lisp
+      (require 'yasnippet)
+      ;;(yas/initialize)
+      (yas/load-directory "~/code/snippets")
+      (yas/global-mode)
+      (global-set-key (kbd "M--") 'yas/expand)
+    #+end_src
+*** Electric punctuation
+    #+begin_src emacs-lisp
+      ;; http://blog.everythingtastesbetterwithchilli.com/2013/02/18/electric-punctuation-in-emacs/
+      (defun mh/electric-punctuation ()
+        "Tidy up whitespace around punctuation: delete any preceding
+      whitespace and insert one space afterwards. Idea stolen from
+      the SwiftKey android keyboard."
+        (interactive)
+        (when (looking-back "\s+" nil t)
+          (delete-region (match-beginning 0) (match-end 0)))
+        (call-interactively 'self-insert-command)
+        ;; Don't insert space if we might be in a number/email/URL:
+        (unless (looking-back "\\([@\\./]\\w+\\|[0-9]\\).") (just-one-space)))
+      (dolist (punc '(?, ?\; ?.))
+        (define-key text-mode-map `[,punc] 'mh/electric-punctuation))
+    #+end_src
 ** Orgmode
    #+begin_src emacs-lisp
      (package-initialize)    ;; Initialize Package
-     (require 'org)
+     ;;(require 'org)
      (require 'org-inlinetask)
      (require 'org-protocol)
    #+end_src
@@ -402,8 +444,7 @@ cool.
                 (tags-todo "EMAIL")
                 (tags-todo "TELEPHON")
                 (tags-todo "ONLINE")
-                (tags-todo "HIWI")
-                (tags-todo "HCB")))
+                (tags-todo "HIWI")))
               ("l" "Lesezeichen"
                ((tags-todo "BOOKMARK")))
               ("p" "Projekte"
@@ -423,11 +464,14 @@ cool.
       (setq org-agenda-include-diary t)
       ;; Aktuelle Zeile in der Agenda hervorheben
       (add-hook 'org-agenda-mode-hook '(lambda () (hl-line-mode 1 )))
-      
+            
       ;; (setq org-agenda-format-date 
       ;;  "%d.%m.%Y ---------------------------------------------------------------------")
       (setq org-agenda-start-on-weekday nil)
       (setq org-deadline-warning-days 10)
+
+      ;; orgbox
+      (require 'orgbox)
     #+end_src
 *** Allgemeine Einstellungen
     #+begin_src emacs-lisp
@@ -459,11 +503,11 @@ cool.
 *** Anbindung von Orgmode an Mac-Programme
     #+begin_src emacs-lisp
       (require 'org-mac-iCal)
-      (require 'org-mac-link-grabber)
-      (global-set-key "\C-cm" 'org-mac-message-insert-selected)
-      (global-set-key "\C-xm" 'omgl-grab-link)
+      (require 'org-mac-link)
+      ;; (global-set-key "\C-cm" 'org-mac-message-insert-selected)
+      (global-set-key "\C-xm" 'org-mac-grab-link)
       (setq org-mac-mail-account "Privat")
-      (setq org-mac-grab-Chrome-app-p nil)
+      (setq org-mac-grab-Firefox-app-p nil)
       (setq org-mac-grab-Safari-app-p nil)
       (setq org-mac-grab-Together-app-p nil)
     #+end_src
@@ -480,8 +524,10 @@ cool.
 *** Export
 **** Allgemeine Einstellungen
      #+begin_src emacs-lisp
-       ;;(require 'ox-export)
+       ;; (require 'ox-export)
+       (setq org-export-backends (quote (ascii beamer html koma-letter icalendar latex md odt org deck)))
        (setq org-export-with-drawers nil)
+       (setq org-export-allow-bind-keywords t)
      #+end_src
 **** LaTeX-Beamer
      #+begin_src emacs-lisp
@@ -489,7 +535,7 @@ cool.
      #+end_src
 **** LaTeX allgemein
      #+begin_src emacs-lisp
-       (setq org-export-latex-classes (quote (("article" "\\documentclass[11pt,a4paper]{article}\\usepackage[margin=2cm]{geometry}\\usepackage{fontspec,xkeyval}\\usepackage[babelshorthands]{polyglossia}\\setdefaultlanguage{german}\\setotherlanguage[variant=poly]{greek}\\setotherlanguages{french,english,latin}\\setromanfont[Mapping=tex-text,Numbers=Lowercase,Ligatures=Common]{Arno Pro}" ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) ("report" "\\documentclass[11pt,a4paper]{report}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")) ("book" "\\documentclass[11pt,a4paper,openany]{memoir}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
+       (setq org-latex-classes (quote (("article" "\\documentclass[11pt,a4paper]{article}\\usepackage[margin=2cm]{geometry}\\usepackage{fontspec,xkeyval}\\usepackage[babelshorthands]{polyglossia}\\setdefaultlanguage{german}\\setotherlanguage[variant=poly]{greek}\\setotherlanguages{french,english,latin}\\setromanfont[Mapping=tex-text,Numbers=Lowercase,Ligatures=Common]{Arno Pro}" ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) ("report" "\\documentclass[11pt,a4paper]{report}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")) ("book" "\\documentclass[11pt,a4paper,openany]{memoir}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
                                               ("org-article" "\\documentclass{org-article}[NO-DEFAULT-PACKAGES]
                       [PACKAGES]
                       [EXTRA]" ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
@@ -497,41 +543,46 @@ cool.
                                               ("koma-report" "\\documentclass{scrreprt}" ("\\chapter{%s}" . "\\chapter*{%s}") ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") ("\\paragraph{%s}" . "\\paragraph*{%s}") ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
                                               ("beamer" "\\documentclass{beamer}\\usepackage{fontspec,xkeyval}\\usepackage[babelshorthands]{polyglossia}\\setdefaultlanguage{german}\\setotherlanguage[variant=poly]{greek}\\setotherlanguages{french,english}\\setromanfont[Mapping=tex-text,Numbers=Lowercase,Ligatures=Common]{Adobe
        Garamond Pro}\\setsansfont[Mapping=tex-text,Numbers=Lowercase,Scale=MatchUppercase]{Iwona}\\newfontfamily\\greekfont[Mapping=tex-text,Script=Greek,Ligatures=Common,Scale=MatchLowercase]{GFS
-       Neohellenic}" org-beamer-sectioning)
-                                              ("beamer-simple" "\\documentclass{beamer}" org-beamer-sectioning))))
-       (setq org-export-latex-date-format "%d. %B %Y")
-       (setq org-export-latex-default-packages-alist (quote (("" "graphicx" t) ("" "longtable" t) ("" "hyperref" t) "\\tolerance=1000")))
-       (setq org-export-latex-emphasis-alist (quote (("*" "\\textbf{%s}" nil) ("/" "\\emph{%s}" nil) ("_" "\\underline{%s}" nil) ("+" "\\st{%s}" nil) ("=" "\\verb" t) ("~" "\\verb" t) ("@" "\\alert{%s}" nil))))
-       (setq org-export-latex-hyperref-format "\\ref{%s}")
-       (setq org-export-latex-listings t)
-       (setq org-export-latex-todo-keyword-markup (quote (("TODO" . "{\\color{red}{\\sffamily\\textbf{%s}}}"))))
+       Neohellenic}" ("\\section\{%s\}" . "\\section*\{%s\}")
+               ("\\subsection\{%s\}" . "\\subsection*\{%s\}")
+               ("\\subsubsection\{%s\}" . "\\subsubsection*\{%s\}"))
+                                              ("beamer-simple" "\\documentclass{beamer}" ("\\section\{%s\}" . "\\section*\{%s\}")
+               ("\\subsection\{%s\}" . "\\subsection*\{%s\}")
+               ("\\subsubsection\{%s\}" . "\\subsubsection*\{%s\}")))))
+       (setq org-latex-date-format "%d. %B %Y")
+       (setq org-latex-default-packages-alist (quote (("" "graphicx" t) ("" "longtable" t) ("" "hyperref" t) "\\tolerance=1000")))
+       (setq org-latex-emphasis-alist (quote (("*" "\\textbf{%s}" nil) ("/" "\\emph{%s}" nil) ("_" "\\underline{%s}" nil) ("+" "\\st{%s}" nil) ("=" "\\verb" t) ("~" "\\verb" t) ("@" "\\alert{%s}" nil))))
+       (setq org-latex-hyperref-format "\\ref{%s}")
+       (setq org-latex-listings t)
+       (setq org-latex-todo-keyword-markup (quote (("TODO" . "{\\color{red}{\\sffamily\\textbf{%s}}}"))))
      #+end_src
 **** HTML
      #+begin_src emacs-lisp
        (require 'htmlize)
        (setq org-emphasis-alist (quote (("*" bold "<b>" "</b>") ("/" italic "<i>" "</i>") ("_" underline "<span style=\"text-decoration:underline;\">" "</span>") ("=" org-code "<code>" "</code>" verbatim) ("~" org-verbatim "<code>" "</code>" verbatim) ("+" (:strike-through t) "<del>" "</del>") ("@" org-warning "<b>" "</b>"))))
-       (setq org-export-html-home/up-format "<div id=\"org-div-home-and-up\" style=\"text-align:right;font-size:70%%;white-space:nowrap;\">
+       (setq org-html-home/up-format "<div id=\"org-div-home-and-up\" style=\"text-align:right;font-size:70%%;white-space:nowrap;\">
         <a accesskey=\"h\" href=\"%s\"> UP </a>
         |
         <a accesskey=\"H\" href=\"%s\"> HOME </a>
        </div>")
-       (setq org-export-html-postamble t)
-       (setq org-export-html-postamble-format (quote (("de" "<p class=\"author\">Autor: %e</p>
-       <p class=\"date\">Datum: %d</p>
+       (setq org-html-postamble t)
+       (setq org-html-postamble-format (quote (("de" "<p class=\"author\">Autor: %e</p>
+       <p class=\"date\">Datum: %C</p>
        <p class=\"creator\">Generated by %c</p>"))))
      #+end_src
 **** HTML5-Präsentation
      #+begin_src emacs-lisp
-     (require 'org-html5presentation)
+       ;; (require 'org-html5presentation)
      #+end_src
 **** Präsentation mit Impress.js
      #+begin_src emacs-lisp
-       (add-to-list 'load-path "~/code/org-impress-js.el/")
-       (require 'org-impress-js)
+       ;; (add-to-list 'load-path "/User/stockhausen/code/org-impress-js.el")
+       ;; (require 'ox-impress-js)
      #+end_src
-**** Markdown
+**** Org-reveal
      #+begin_src emacs-lisp
-       (require 'org-md)
+       (require 'ox-reveal)
+       (setq org-reveal-root "file:///Users/stockhausen/code/reveal.js")
      #+end_src
 *** Footnotes
     #+begin_src emacs-lisp
@@ -551,15 +602,15 @@ cool.
 *** Keyboard shortcuts
 
     #+begin_src emacs-lisp
-     (global-set-key "\C-cg" 'gtd)
-     (global-set-key "\C-ca" 'org-agenda)
-     (global-set-key "\C-xr" 'org-table-insert-row)
-     (global-set-key "\C-xl" 'org-table-insert-hline)
-     (global-set-key (kbd "C-c l") 'org-store-link)  ;; Links
-     (global-set-key "\C-cr" 'org-capture)
-     (global-set-key (kbd "C-c b") 'org-iswitchb)    ;; switch
-     (global-set-key (kbd "C-c h")  'my-open-calendar) ;; Calfw-Kalender
-     (global-set-key (kbd "C-c t")  'org-todo-list)   ;; todo-list (NextActions)
+      (global-set-key "\C-cg" 'gtd)
+      (global-set-key "\C-ca" 'org-agenda)
+      (global-set-key "\C-xr" 'org-table-insert-row)
+      (global-set-key "\C-xl" 'org-table-insert-hline)
+      (global-set-key (kbd "C-c l") 'org-store-link)  ;; Links
+      (global-set-key "\C-cr" 'org-capture)
+      (global-set-key (kbd "C-c b") 'org-iswitchb)    ;; switch
+      (global-set-key (kbd "C-x c")  'my-open-calendar) ;; Calfw-Kalender
+      (global-set-key (kbd "C-c t")  'org-todo-list)   ;; todo-list (NextActions)
     #+end_src
 
     =append-next-kill= is more useful to me than =org-table-copy-region=.
@@ -567,26 +618,20 @@ cool.
     #+begin_src emacs-lisp
       (define-key org-mode-map (kbd "C-M-w") 'append-next-kill)
     #+end_src
-
-    I don't use the diary, but I do use the clock a lot.
-
-    #+begin_src emacs-lisp
-      (define-key org-agenda-mode-map "i" 'org-agenda-clock-in)
-    #+end_src
     
 *** Managing tasks
 **** Track TODO state
      #+begin_src emacs-lisp
-       (setq org-todo-keywords (quote ((sequence "TODO(t)" "BEGONNEN(b!)" "|" "ZUDELEGIEREN(z@/!)" "DELEGIERT(d@/!)" "WARTEN(w@/!)" "ERLEDIGT(e!)")
-                                       (sequence  "IRGENDWANN(I@/!)" "OFFEN(O@/!)" "|" "GESTRICHEN(g@/!)")
-                                       (sequence "|" "DONE(f)"))))
+       (setq org-todo-keywords (quote ((sequence "TODO(t)" "BEGONNEN(b!)" "BLOCKIERT(k!)" "|" "DELEGIERT(d@/!)" "WARTEN(w@/!)" "ERLEDIGT(e!)")
+                                       (sequence  "IRGENDWANN(I@/!)" "OFFEN(O@/!)" "|" "GESTRICHEN(g@/!)"))))
        (setq org-todo-keyword-faces (quote (("TODO" :foreground "tomato" :weight bold)
                                             ("BEGONNEN" :foreground "LightSkyBlue3" :weight bold)
-                                            ("ERLEDIGT" :foreground "grey50" :weight bold)
-                                            ("WARTEN" :foreground "indian red" :weight bold)
-                                            ("DELEGIERT" :foreground "royal blue" :weight bold)
-                                            ("IRGENDWANN" :foreground "lime green" :weight bold)
-                                            ("GESTRICHEN" shadow)
+                                            ("BLOCKIERT" :foreground "firebrick1" :weight bold)
+                                            ("ERLEDIGT" :foreground "green2" :weight bold)
+                                            ("WARTEN" :foreground "tomato1" :weight bold)
+                                            ("DELEGIERT" :foreground "SkyBlue1" :weight bold)
+                                            ("IRGENDWANN" :foreground "LightCyan4")
+                                            ("GESTRICHEN" :foreground "LightGray")
                                             ("OFFEN" :foreground "blue" :weight bold))))
      #+end_src
      
@@ -597,7 +642,6 @@ cool.
 **** Tag tasks
      #+begin_src emacs-lisp
        (setq org-tag-alist (quote (("INSTITUT" . ?i)
-                                   ("HCB" . ?b)
                                    ("ZUHAUSE" . ?h)
                                    ("HIWI" . ?w)
                                    ("COMPUTER" . ?c)
@@ -653,8 +697,8 @@ cool.
     
     #+begin_src emacs-lisp
       (require 'org-mobile)
-      (setq org-mobile-directory "/Volumes/webdav.smartdrive.web.de/orgmode")
-      (setq org-mobile-inbox-for-pull "/Volumes/webdav.smartdrive.web.de/orgmode/inbox.org")
+      (setq org-mobile-directory "/Volumes/…/orgmode")
+      (setq org-mobile-inbox-for-pull "/Volumes/…/orgmode/inbox.org")
       (setq org-mobile-files (quote ("~/Private/ORG/gtd.org" "~/Private/ORG/notizen.org")))
     #+end_src
 
@@ -670,7 +714,6 @@ cool.
                           org-eval
                           org-expiry
                           org-interactive-query
-                          org-mac-message
                           org-man
                           org-bibtex
                           org-panel
@@ -683,11 +726,11 @@ cool.
     #+end_src
 *** Orgmode und BibTeX
     #+begin_src emacs-lisp
-      (require 'org-exp-bibtex)
+      (require 'org-bibtex)
     #+end_src
 *** Orgmode und LaTeX
     #+begin_src emacs-lisp
-      (setq org-latex-to-pdf-process (list "latexmk -xelatex %f"))
+      (setq org-latex-pdf-process (list "latexmk -xelatex %f"))
     #+end_src
 *** Publishing
     Timestamps and section numbers make my published files look more
@@ -700,7 +743,7 @@ cool.
     Publishing:
 
     #+begin_src emacs-lisp
-      (require 'org-publish)
+      ;; (require 'org-publish)
       (setq org-publish-project-alist
             '(
               ("privat-notes"
@@ -708,7 +751,7 @@ cool.
                :base-extension "org"
                :publishing-directory "~/Sites/Privat"
                :recursive t
-               :publishing-function org-publish-org-to-html
+               :publishing-function org-html-publish-to-html
                :headline-levels 4             ; Just the default for this project.
                :toc nil
                :language de
@@ -729,8 +772,8 @@ cool.
 
     Keine Default-Styles beim Export
     #+begin_src emacs-lisp
-      (setq org-export-html-style-include-default nil)
-      (setq org-export-html-style-include-scripts nil)
+      (setq org-html-head-include-default nil)
+      (setq org-html-head-include-scripts nil)
     #+end_src
 *** RefTeX in Orgmode
     #+begin_src emacs-lisp
@@ -805,28 +848,22 @@ cool.
       (setq org-yank-adjusted-subtrees t)  
     #+end_src
 
-*** Org-Sync (Bugtracking)
-#+begin_src emacs-lisp
-  (add-to-list 'load-path "~/.emacs.d/org-sync")
-  (mapc 'load
-        '("org-element" "os" "os-bb" "os-github"))
-#+end_src
-
 *** Speedbar
    #+begin_src emacs-lisp
-     (require 'speedbar)
-     (require 'sr-speedbar)
-     (speedbar-add-supported-extension ".org")
-     (add-hook 'org-mode-hook
-               (lambda () (imenu-add-to-menubar "Imenu")))
-     (add-hook 'org-mode-hook 'imenu-add-menubar-index)
-     (global-set-key (kbd "C-l") 'sr-speedbar-toggle)  
+     ; disabled, problem with emacs 24.4
+     ; (require 'speedbar)
+     ; (require 'sr-speedbar)
+     ; (speedbar-add-supported-extension ".org")
+     ; (add-hook 'org-mode-hook
+     ;           (lambda () (imenu-add-to-menubar "Imenu")))
+     ; (add-hook 'org-mode-hook 'imenu-add-menubar-index)
+     ; (global-set-key (kbd "C-l") 'sr-speedbar-toggle)  
  #+end_src
 ** Markdown
 *** Markdown für .md-Dateien
     #+begin_src emacs-lisp
-    (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
-    (setq markdown-command "multimarkdown")
+      (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+      (setq markdown-command "pandoc -s -c /Users/stockhausen/Private/ORG/css/Github2.css -t html")
     #+end_src
 
 ** Pandoc
@@ -834,14 +871,120 @@ cool.
    (setq pandoc-binary "/usr/local/bin/pandoc")
    #+end_src
 ** LaTeX
+*** Allgemein
+    #+begin_src emacs-lisp
+      (setq TeX-parse-self t); Enable parse on load.
+      (setq TeX-auto-save t); Enable parse on save.
+      (setq-default TeX-auto-regexp-list 'TeX-auto-full-regexp-list)
+      (setq-default TeX-auto-parse-length 999999)
+      ;; (setq-default TeX-master nil)
+      ;;(setq TeX-open-quote "»")
+      ;;(setq TeX-close-quote "«")
+      (setq font-latex-quotes (quote german))
+      ;;(setq LaTeX-csquotes-close-quote "}")
+      ;;(setq LaTeX-csquotes-open-quote "\\enquote{")
+      (setq TeX-PDF-mode t)
+      (setq TeX-default-macro "footnote")
+      (add-hook 'LaTeX-mode-hook 'turn-on-auto-fill)
+      (add-hook 'LaTeX-mode-hook (lambda ()
+                                   (TeX-fold-mode 1)))
+      ;; Outline-Minor-Mode for folding
+      (outline-minor-mode t)
+      (add-hook 'LaTeX-mode-hook (lambda()
+                                   (interactive)
+                                   (local-set-key (kbd "M-TAB") 'outline-toggle-children)
+                                                               (local-set-key [M-left] 'hide-body)
+                                                               (local-set-key [M-right] 'show-all)
+                                                               (local-set-key [M-up] 'outline-previous-heading)
+                                                               (local-set-key [M-down] 'outline-next-heading)
+                                                               (local-set-key [C-M-left] 'hide-sublevels)
+                                                               (local-set-key [C-M-right] 'show-children)
+                                                               (local-set-key [C-M-up] 'outline-previous-visible-heading)
+                                                               (local-set-key [C-M-down] 'outline-next-visible-heading)))
+      ;; 
+      (setq TeX-source-correlate-mode t)
+      ;; use Skim as default pdf viewer
+      ;; Skim's displayline is used for forward search (from .tex to .pdf)
+      (setq TeX-view-program-list
+            '(("Skim" 
+               "/Applications/Skim.app/Contents/SharedSupport/displayline -g %n %o %b"))
+            TeX-view-program-selection
+            '((output-pdf "Skim")))
+      ;; TeX-Commands
+      (setq TeX-command-list (quote (("TeX" "%(PDF)%(tex) %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil (plain-tex-mode texinfo-mode ams-tex-mode) :help "Run plain TeX")
+                                     ("LaTeX" "%`%l%(mode)%' %t" TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX")
+                                     ("XeLaTeX" "xelatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run XeLaTeX")
+                                     ("LuaLaTeX" "lualatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run LuaLaTeX")
+                                     ("Latexmk (PDF)" "latexmk -pdflatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run PDFLaTeX with latexmk")
+                                     ("Latexmk (XeLaTeX)" "latexmk -xelatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run XeLaTeX with latexmk")
+                                     ("BibTeX" "biber %s" TeX-run-BibTeX nil t :help "Run BibTeX")
+                                     ("View" "%V" TeX-run-discard-or-function t t :help "Run Viewer")
+                                     ("Makeinfo" "makeinfo %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with Info output")
+                                     ("Makeinfo HTML" "makeinfo --html %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with HTML output")
+                                     ("ConTeXt" "texexec --once --texutil %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt once")
+                                     ("ConTeXt Full" "texexec %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt until completion")
+                                     ("Print" "%p" TeX-run-command t t :help "Print the file")
+                                     ("Queue" "%q" TeX-run-background nil t :help "View the printer queue" :visible TeX-queue-command)
+                                     ("Check" "lacheck %s" TeX-run-compile nil (latex-mode) :help "Check LaTeX file for correctness")
+                                     ("Spell" "(TeX-ispell-document \"\")" TeX-run-function nil t :help "Spell-check the document")
+                                     ("Clean" "TeX-clean" TeX-run-function nil t :help "Delete generated intermediate files")
+                                     ("Clean All" "(TeX-clean t)" TeX-run-function nil t :help "Delete generated intermediate and output files")
+                                     ("Other" "" TeX-run-command t t :help "Run an arbitrary command"))))
+    #+end_src
 *** Syntax-Highlighting
     #+begin_src emacs-lisp
       (setq LaTeX-paragraph-commands (quote ("pstart" "pend" "kap" "textcomm")))
       (setq font-latex-match-function-keywords (quote (("beginnumbering" "") ("endnumbering" "") ("hist" "{")  ("transfn" "{"))))
       (setq font-latex-match-reference-keywords (quote (("edindex" "[{") ("esindex" "{") ("enindex" "{") ("nindex" "{") ("pindex" "{") ("qindex" "{") ("aindex" "{") ("cindex" "{") ("bindex" "{") ("grindex" "{") ("sindex" "{") ("specialindex" "{{{"))))
-      (setq font-latex-match-textual-keywords (quote (("var" "{{") ("varlat" "{{") ("varabb" "{{") ("varom" "{{") ("varomabb" "{{{") ("varadd" "{{") ("vartr" "{{") ("bibel" "{{") ("bibelcf" "{{") ("bibelcfl" "{{{") ("bezeugung" "{") ("bezeugungpart" "{{"))))
-      (setq font-latex-user-keyword-classes (quote (("Todos" (("todo" "{{") ("marke" "{")) (:weight bold :foreground "red" :background "yellow") command) ("Textkrit" (("komm" "{{") ("komml" "{{{") ("textcr" "{{") ("zitat" "{{{{") ("stelle" "{{{")) (:foreground "gray40" :slant italic) command) ("Transl" (("transl" "{") ("fundort" "{{{{")) (:foreground "gray60") command))))
+      (setq font-latex-match-textual-keywords (quote (("var" "{{") ("varlat" "{{") ("varabb" "{{") ("varlabb" "{{{") ("varom" "{{") ("varomabb" "{{{") ("varadd" "{{") ("vartr" "{{") ("stelle" "{{{") ("bibel" "{{") ("bibelcf" "{{") ("bibelcfl" "{{{") ("bezeugung" "{") ("bezeugungpart" "{{") ("zitatl" "{{{{") ("zitat" "{{"))))
+      (setq font-latex-user-keyword-classes (quote (("Todos" (("todo" "{{") ("marke" "{")) (:weight bold :foreground "red" :background "yellow") command) ("Textkrit" (("textkr" "{{") ("textkrl" "{{{")) (:foreground "sienna") command)  ("Kommentar" (("komm" "{{") ("komml" "{{{")  ("rez" "{{") ("rezl" "{{{")) (:foreground "DodgerBlue4" :slant italic) command) ("Zusammenfassung" (("zsfsg" "{")) (:background "LightCyan") command)  ("Transl" (("transl" "{")) (:background "gray97") command) ("Fundort" (("fundort" "{{{{")) (:foreground "blue") command))))
     #+end_src
+*** Folding
+    #+BEGIN_SRC emacs-lisp
+      (setq TeX-fold-macro-spec-list (quote (("[f]" ("footnote" "hist"))
+                                             ("{1}" ("cite" "footcite"))
+                                             ("[l]" ("label" "edlabel"))
+                                             ("[r]" ("ref" "pageref" "edpageref" "lineref"))
+                                             ("[i]" ("index" "aindex" "bindex" "sindex" "nindex" "specialindex" "edindex" "esindex" "enindex"))
+                                             ("[m]" ("margin" "marginpar" "randnotiz"))
+                                             ("[1]:||*" ("item"))
+                                             ("(...)" ("ausl"))
+                                             ("..." ("dots"))
+                                             ("<{1}>" ("Ladd"))
+                                             ("\[{1}\]" ("ladd"))
+                                             (" " ("pstart"))
+                                             (" " ("pend"))
+                                             ("{1}" ("var"))
+                                             ("{1}" ("varl"))
+                                             ("{1}" ("varlat"))
+                                             ("{1}" ("varabb"))
+                                             ("{1}" ("varlabb"))
+                                             ("{1}" ("varadd"))
+                                             ("{1}" ("varom"))
+                                             ("{1}" ("varomabb"))
+                                             ("{1}" ("varomlat"))
+                                             ("{1}" ("vartr"))
+                                             ("{1} " ("kap"))
+                                             ("{1}" ("bibel"))
+                                             ("{1}" ("bibelcf"))
+                                             ("{1}" ("bibelcfl"))
+                                             ("{1}" ("marke"))
+                                             ("{1}" ("todo"))
+                                             ("{1}" ("zitat"))
+                                             ("{1}" ("zitatl"))
+                                             ("{1} (textkr)" ("textkr"))
+                                             ("{1} (textkr)" ("textkrl"))
+                                             ("{1} (komm)" ("komm"))
+                                             ("{1} (komm)" ("komml"))
+                                             ("[Zsfsg.: ]" ("zsfsg"))
+                                             ("{1}" ("transl"))
+                                             (1 ("part" "chapter" "section" "subsection" "subsubsection" "paragraph" "subparagraph"
+                                                 "part*" "chapter*" "section*" "subsection*" "subsubsection*" "paragraph*" "subparagraph*" "emph" "textit" "textsl" "textmd" "textrm" "textsf" "texttt" "textbf" "textsc" "textup" "textcomm" "abschnitt")))))
+      (setq TeX-fold-env-spec-list (quote (("[Praefatio]" ("praefatio"))
+                                           ("[Edition]" ("Leftside"))
+                                           ("[Übersetzung]" ("Rightside")))))
+
+    #+END_SRC
 *** RefTeX
     #+begin_src emacs-lisp
       (require 'reftex)
@@ -849,9 +992,10 @@ cool.
       (setq reftex-plug-into-AUCTeX t) 
       (setq reftex-enable-partial-scans t)
       (setq reftex-use-external-file-finders t)
+      (setq reftex-bibliography-commands (quote ("bibliography" "nobibliography" "setupbibtex\\[.*?database=" "addbibresource")))
       (setq reftex-external-file-finders
-        '(("tex" . "kpsewhich -format=.tex %f")
-          ("bib" . "kpsewhich -format=.bib %f")))
+            '(("tex" . "kpsewhich -format=.tex %f")
+              ("bib" . "kpsewhich -format=.bib %f")))
     #+end_src
 *** Reftex-Index
     #+begin_src emacs-lisp
@@ -889,43 +1033,4 @@ cool.
               ("citetitle" "[{") 
               ("citetitles" "[{") 
               ("headlessfullcite" "[{")))
-    #+end_src
-*** Allgemein
-    #+begin_src emacs-lisp
-      ;;(setq TeX-open-quote "»")
-      ;;(setq TeX-close-quote "«")
-      (setq font-latex-quotes (quote german))
-      ;;(setq LaTeX-csquotes-close-quote "}")
-      ;;(setq LaTeX-csquotes-open-quote "\\enquote{")
-      (setq TeX-PDF-mode t)
-      (setq TeX-default-macro "footnote")
-      (add-hook 'LaTeX-mode-hook 'turn-on-auto-fill)
-      (setq TeX-source-correlate-mode t)
-      ;; use Skim as default pdf viewer
-      ;; Skim's displayline is used for forward search (from .tex to .pdf)
-      (setq TeX-view-program-list
-            '(("Skim" 
-               "/Applications/Skim.app/Contents/SharedSupport/displayline -g %n %o %b"))
-            TeX-view-program-selection
-            '((output-pdf "Skim")))
-      ;; TeX-Commands
-      (setq TeX-command-list (quote (("TeX" "%(PDF)%(tex) %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil (plain-tex-mode texinfo-mode ams-tex-mode) :help "Run plain TeX")
-                                     ("LaTeX" "%`%l%(mode)%' %t" TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX")
-                                     ("XeLaTeX" "xelatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run XeLaTeX")
-                                     ("LuaLaTeX" "lualatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run LuaLaTeX")
-                                     ("Latexmk (PDF)" "latexmk -pdflatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run PDFLaTeX with latexmk")
-                                     ("Latexmk (XeLaTeX)" "latexmk -xelatex -synctex=1 %t" TeX-run-TeX nil (latex-mode) :help "Run XeLaTeX with latexmk")
-                                     ("BibTeX" "biber %s" TeX-run-BibTeX nil t :help "Run BibTeX")
-                                     ("View" "%V" TeX-run-discard-or-function t t :help "Run Viewer")
-                                     ("Makeinfo" "makeinfo %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with Info output")
-                                     ("Makeinfo HTML" "makeinfo --html %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with HTML output")
-                                     ("ConTeXt" "texexec --once --texutil %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt once")
-                                     ("ConTeXt Full" "texexec %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt until completion")
-                                     ("Print" "%p" TeX-run-command t t :help "Print the file")
-                                     ("Queue" "%q" TeX-run-background nil t :help "View the printer queue" :visible TeX-queue-command)
-                                     ("Check" "lacheck %s" TeX-run-compile nil (latex-mode) :help "Check LaTeX file for correctness")
-                                     ("Spell" "(TeX-ispell-document \"\")" TeX-run-function nil t :help "Spell-check the document")
-                                     ("Clean" "TeX-clean" TeX-run-function nil t :help "Delete generated intermediate files")
-                                     ("Clean All" "(TeX-clean t)" TeX-run-function nil t :help "Delete generated intermediate and output files")
-                                     ("Other" "" TeX-run-command t t :help "Run an arbitrary command"))))
     #+end_src
