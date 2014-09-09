@@ -1,0 +1,141 @@
+#+TITLE: Einstellungen für mu4e
+* mu4e laden
+  #+begin_src emacs-lisp
+    (require 'mu4e)
+    (setq mail-user-agent 'mu4e-user-agent)
+  #+end_src
+* Allgemeine Einstellungen
+   #+begin_src emacs-lisp
+     ;; Start in new frame
+     (defun mu4e-in-new-frame ()
+       "Start mu4e in new frame."
+       (interactive)
+       (select-frame (make-frame))
+       (mu4e))
+     ;; Start Mu4e
+     (global-set-key [(f4)] 'mu4e-in-new-frame)
+     (setq mu4e-update-interval 600) ;; alle 10 min
+     (setq mu4e-get-mail-command "offlineimap")
+     (require 'org-mu4e) ;; Orgmode-Bindings 
+     (defalias 'org-mail 'org-mu4e-compose-org-mode)
+     (setq smtpmail-queue-mail  nil  ;; start in non-queuing mode
+           smtpmail-queue-dir   "~/Mail/queue/cur")
+     (add-to-list 'mu4e-view-actions
+                  '("ViewInBrowser" . mu4e-action-view-in-browser) t)
+     ;; Bookmarks
+     (setq mu4e-bookmarks
+           '(("flag:unread" "Ungelesen" ?n)
+             ("flag:flagged"       "Markiert"     ?m)
+             ("date:today..now" "Heute" ?h)
+             ("date:7d..now" "Woche" ?w)  
+             ("maildir:/Mail/Inbox" "Posteingang Privat" ?p)))
+          ;; shortcuts
+     (setq mu4e-maildir-shortcuts
+           '(("/Mail/Archive" . ?a)))
+     ;; don't keep message buffers around
+     (setq message-kill-buffer-on-exit t)
+     ;; show images
+     (setq mu4e-show-images t)
+     ;; no signature by default
+     (setq mu4e-compose-signature-auto-include nil)
+     ;; Datumsformat
+     (setq  mu4e-headers-date-format "%d.%m.%Y %H:%M") 
+     ;; Header-Liste
+     (setq mu4e-headers-fields
+           '( (:date          .  20)
+              (:flags         .   6)
+              (:from          .  30)
+              (:subject       .  nil)))
+     ;; Anhänge speichern unter...
+     (setq mu4e-attachment-dir "~/Desktop")
+     ;; Reply-Einstellungen
+     (setq message-citation-line-format "%N schrieb am %d.%m.%Y um %H:%M Uhr:\n")
+     (setq message-citation-line-function 'message-insert-formatted-citation-line)
+     ;; Archive and Trash to account
+     ;; set the archive according to the mailbox
+     (setq mu4e-refile-folder
+           (lambda (msg)
+             (if msg
+                 (let ((account (nth 1 (split-string (mu4e-message-field msg :maildir) "/"))))
+                   (format "/%s/Archive" account)))))
+     ;; set the trash according to the mailbox
+     (setq mu4e-trash-folder
+           (lambda (msg)
+             (if msg
+                 (let ((account (nth 1 (split-string (mu4e-message-field msg :maildir) "/"))))
+                   (format "/%s/Trash" account)))))
+     ;; mu4e-maildirs-extension
+     (mu4e-maildirs-extension)
+     (setq mu4e-maildirs-extension-title "  Feeds")
+     (setq mu4e-maildirs-extension-custom-list (quote ("/Feeds/Merken" "/Feeds/Zeitschriften" "/Feeds/Akademisch" "/Feeds/Patristik" "/Feeds/Handschriften")))
+   #+end_src
+* Mails mit Org
+  #+BEGIN_SRC emacs-lisp
+    ;; convert org mode to HTML automatically
+    (setq org-mu4e-convert-to-html t)
+    (defalias 'org-mail 'org-mu4e-compose-org-mode)
+  #+END_SRC
+* Accounts und Versand
+   #+begin_src emacs-lisp
+     (require 'smtpmail)
+     (require 'starttls)
+
+     (setq message-send-mail-function 'smtpmail-send-it)
+     (defun gnutls-available-p ()
+       "Function redefined in order not to use built-in GnuTLS support"
+       nil)
+     (setq starttls-gnutls-program "gnutls-cli")
+     (setq starttls-use-gnutls t)
+     (setq smtpmail-stream-type 'starttls)
+     (setq mu4e-maildir "/Users/stockhausen/Mail")
+     (defvar my-mu4e-account-alist
+       '(("Mail"
+          (mu4e-sent-folder "/Mail/Gesendet")
+          (mu4e-drafts-folder "/Mail/Drafts")
+          (mu4e-refile-folder "/Mail/Archive")
+          (user-mail-address "vsa@abc.de")
+          (user-full-name "AVS")
+          (mu4e-compose-signature "Signature\nAddress")
+          (smtpmail-default-smtp-server "smtp.1und1.de")
+          (smtpmail-local-domain nil)
+          (smtpmail-smtp-server "smtp.1und1.de")
+          (smtpmail-starttls-credentials '(("smtp.1und1.de" 587 nil nil)))
+          (smtpmail-auth-credentials '(("smtp.1und1.de" 587 "vsa@abc.de" nil)))
+          (smtpmail-smtp-service 587))
+         ("Feeds"
+          (mu4e-refile-folder "/Feeds/Merken"))
+         ("Mail2"
+          (mu4e-sent-folder "/Mail2/Gesendet")
+          (mu4e-drafts-folder "/Mail2/Drafts")
+          (mu4e-refile-folder "/Mail2/Archive")
+          (user-mail-address "avs@abc.de")
+          (user-full-name "AVS")
+          (mu4e-compose-signature "Signature\nAddress")
+          (smtpmail-default-smtp-server "smtp.1und1.de")
+          (smtpmail-local-domain nil)
+          (smtpmail-smtp-server "smtp.1und1.de")
+          (smtpmail-starttls-credentials '(("smtp.1und1.de" 587 nil nil)))
+          (smtpmail-auth-credentials '(("smtp.1und1.de" 587 "avs@abc.de" nil)))
+          (smtpmail-smtp-service 587))))
+
+
+     (defun my-mu4e-set-account ()
+            "Set the account for composing a message."
+            (let* ((account
+                    (if mu4e-compose-parent-message
+                        (let ((maildir (mu4e-message-field mu4e-compose-parent-message :maildir)))
+                          (string-match "/\\(.*?\\)/" maildir)
+                          (match-string 1 maildir))
+                      (completing-read (format "Compose with account: (%s) "
+                                               (mapconcat #'(lambda (var) (car var)) my-mu4e-account-alist "/"))
+                                       (mapcar #'(lambda (var) (car var)) my-mu4e-account-alist)
+                                       nil t nil nil (caar my-mu4e-account-alist))))
+                   (account-vars (cdr (assoc account my-mu4e-account-alist))))
+              (if account-vars
+                  (mapc #'(lambda (var)
+                            (set (car var) (cadr var)))
+                        account-vars)
+                (error "No email account found"))))            
+     (add-hook 'mu4e-compose-pre-hook 'my-mu4e-set-account)             
+     (setq ssl-program-name "openssl s_client -ssl2 -connect %s:%p")
+#+end_src
